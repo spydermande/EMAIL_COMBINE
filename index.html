@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warmy domain and seed manager</title>
+<style>
+:root{--bg:#eef1f4;--card:#fff;--tx:#14202b;--mu:#5b6b7a;--bd:#d6dde4;--ac:#0f766e;--on:#fff;--ok:#15803d;--er:#b91c1c;--code:#f1f4f7}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1419;--card:#151d25;--tx:#e6edf3;--mu:#8fa1b2;--bd:#26323d;--ac:#2dd4bf;--on:#05211e;--ok:#4ade80;--er:#f87171;--code:#1b252f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--card);border-bottom:1px solid var(--bd)}
+h1{font-size:18px;margin:0;font-weight:650}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+nav{display:flex;gap:4px;border-bottom:1px solid var(--bd);margin-bottom:18px}
+nav button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mu);padding:10px 14px;font:inherit;cursor:pointer}
+nav button.on{color:var(--tx);border-color:var(--ac);font-weight:600}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:16px}
+h2{font-size:15px;margin:0 0 10px;font-weight:650}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:90px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+button.b{background:var(--ac);color:var(--on);border:0;border-radius:6px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+button.g{background:none;color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}.row>*{flex:1 1 180px}.row>button{flex:0 0 auto}
+.msg{margin-top:10px;font-size:14px;white-space:pre-wrap}.ok{color:var(--ok)}.er{color:var(--er)}.mu{color:var(--mu)}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:8px 6px;border-top:1px solid var(--bd);vertical-align:top}
+th{font-size:13px;color:var(--mu);font-weight:500;border-top:0}
+.pill{font-size:13px;padding:3px 10px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}.pill.er{color:var(--er);border-color:var(--er)}
+pre{background:var(--code);padding:10px;border-radius:6px;overflow:auto;max-height:260px;font-size:12px;margin:6px 0 0}
+.scroll{max-height:320px;overflow:auto;background:var(--code);border-radius:6px;padding:8px 10px}
+details summary{cursor:pointer;color:var(--mu);font-size:13px}
+.ep{border-top:1px solid var(--bd);padding:10px 0}.ep .row>*{flex:1 1 120px}.ep .row .p{flex:3 1 280px}.ep .row .m{flex:0 0 90px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Warmy domain and seed manager</h1>
+  <div class="row" style="flex:0 0 auto;align-items:center">
+    <span id="conn" class="pill">Not connected</span>
+    <button class="g" id="test">Test connection</button>
+  </div>
+</header>
+<main>
+<nav id="tabs">
+  <button data-t="domains" class="on">Domains</button>
+  <button data-t="seeds">Seeds</button>
+  <button data-t="settings">Settings</button>
+  <button data-t="log">Request log</button>
+</nav>
+
+<section id="domains" class="on">
+  <div class="card">
+    <h2>Add domains to the Gmail premium seed list</h2>
+    <div id="target" class="mu" style="font-size:13px">Target list: found when you press Add domains. Nothing is added to any other list.</div>
+    <label for="newd">One domain per line, or a full sender email such as name@example.com</label>
+    <textarea id="newd" placeholder="example.com&#10;mail.example.org"></textarea>
+    <div class="row"><div><label for="localpart">Sender name used for plain domains (name@domain)</label><input id="localpart" class="mono" value="info"></div></div>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input id="alsoDom" type="checkbox" style="width:auto"> Also register the domain in the account domains list</label>
+    <div class="row" style="margin-top:10px"><button class="b" id="addd">Add to Gmail premium</button></div>
+    <div id="addres" class="msg"></div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div><h2 style="margin:0">Your domains</h2></div>
+      <input id="dq" placeholder="Filter domains" aria-label="Filter domains">
+      <button class="g" id="refd">Refresh</button>
+    </div>
+    <div id="dmsg" class="msg mu">Add your API key and Holder UID in Settings, then press Refresh.</div>
+    <table id="dtable" hidden><thead><tr><th>Domain</th><th>Summary</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<section id="seeds">
+  <div class="card">
+    <h2>Pick a domain and a seed list</h2>
+    <div class="row">
+      <div><label for="sd">Domain</label><input id="sd" class="mono" placeholder="example.com"></div>
+      <button class="g" id="lists">Load seed lists</button>
+    </div>
+    <div class="row">
+      <div><label for="sl">Seed list</label><select id="sl"><option value="">Load seed lists first</option></select></div>
+      <button class="b" id="loadseeds">Load seeds</button>
+    </div>
+    <div id="smsg" class="msg mu"></div>
+  </div>
+  <div class="card" id="sendersCard" hidden>
+    <h2>Sender emails for this domain</h2>
+    <table><tbody id="senders"></tbody></table>
+    <div class="row" style="margin-top:10px">
+      <div><label for="newsender">Add sender email</label><input id="newsender" class="mono" placeholder="name@example.com"></div>
+      <button class="b" id="addsender">Add sender</button>
+    </div>
+    <div id="smsg2" class="msg"></div>
+  </div>
+  <div class="card" id="seedsCard" hidden>
+    <div class="row">
+      <div><h2 style="margin:0" id="scount">Seed addresses</h2></div>
+      <input id="sf" placeholder="Filter, e.g. gmail.com" aria-label="Filter seed addresses">
+      <button class="g" id="copy">Copy</button>
+      <button class="g" id="csv">Download CSV</button>
+    </div>
+    <div class="scroll mono" id="seedlist" style="margin-top:10px"></div>
+  </div>
+</section>
+
+<section id="settings">
+  <div class="card">
+    <h2>Connection</h2>
+    <label for="base">API base URL</label><input id="base" class="mono">
+    <label for="token">API key (sent as a Bearer token)</label><input id="token" type="password" class="mono" autocomplete="off">
+    <label for="holder">Holder UID (shown in the Authentication section of the Warmy API docs)</label><input id="holder" class="mono" autocomplete="off">
+    <label for="premiumId">Gmail premium seed list ID (optional, found automatically when empty)</label><input id="premiumId" class="mono" autocomplete="off">
+    <label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input id="remember" type="checkbox" style="width:auto"> Remember the API key on this device</label>
+    <p class="mu" style="font-size:13px">The key is sent only to the base URL above. If your browser blocks requests to api.warmy.io (a CORS error in the log), point the base URL at a small proxy you run.</p>
+  </div>
+  <div class="card">
+    <h2>Endpoints</h2>
+    <p class="mu" style="font-size:13px;margin-top:0">These paths are starting values. Compare them with the Warmy API documentation or its OpenAPI file and edit any that differ. Placeholders: {{domain}} {{id}} {{page}} {{per}} {{email}} {{sid}}.</p>
+    <div id="eps"></div>
+  </div>
+  <div class="row"><button class="b" id="save">Save settings</button><button class="g" id="reset">Reset endpoints</button></div>
+  <div id="setmsg" class="msg"></div>
+</section>
+
+<section id="log">
+  <div class="row" style="margin-bottom:10px"><div class="mu">Every request and response (the key is never logged).</div><button class="g" id="clog">Clear</button></div>
+  <div id="logs"></div>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s), K='warmy_mgr';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const EP_LABEL={listDomains:'List domains',addDomain:'Add a domain',listSeeds:'List seed lists',getSeed:'Get one seed list (with senders)',seedEmails:'Get seed emails (paged)',addSender:'Add a sender to a seed list',removeSender:'Remove a sender from a seed list'};
+const DEF_EP={
+  listDomains:{m:'GET',p:'/api/v2/domains'},
+  addDomain:{m:'POST',p:'/api/v2/domains',b:'{"domain":"{{domain}}"}'},
+  listSeeds:{m:'GET',p:'/api/v2/users_splits'},
+  getSeed:{m:'GET',p:'/api/v2/users_splits/{{id}}'},
+  seedEmails:{m:'GET',p:'/api/v2/users_splits/{{id}}/emails?page={{page}}&per_page={{per}}'},
+  addSender:{m:'PUT',p:'/api/v2/users_splits/{{id}}',b:'{"users_split":{"users_splits_senders_attributes":[{"email":"{{email}}","_destroy":false}]}}'},
+  removeSender:{m:'PUT',p:'/api/v2/users_splits/{{id}}',b:'{"users_split":{"users_splits_senders_attributes":[{"id":{{sid}},"email":"{{email}}","_destroy":true}]}}'}
+};
+let S={base:'https://api.warmy.io',token:'',holder:'',premiumId:'',remember:false,ep:JSON.parse(JSON.stringify(DEF_EP))};
+let D={domains:[],lists:[],seeds:[],senders:[],listId:''}, LOG=[];
+
+/* storage */
+try{const r=JSON.parse(localStorage.getItem(K)||'null');if(r){S={...S,...r,ep:{...S.ep,...(r.ep||{})}}}
+ const t=sessionStorage.getItem(K+'t');if(t&&!S.token)S.token=t;}catch(e){}
+function persist(){try{localStorage.setItem(K,JSON.stringify({...S,token:S.remember?S.token:''}));sessionStorage.setItem(K+'t',S.token)}catch(e){}}
+
+/* api */
+let last=0;
+function fill(t,v,mode){return String(t||'').replace(/\{\{(\w+)\}\}/g,(_,k)=>{const x=v[k]??'';return mode==='path'?encodeURIComponent(x):JSON.stringify(x).replace(/^"|"$/g,'')})}
+function addLog(e){LOG.unshift(e);LOG=LOG.slice(0,60);renderLog()}
+function errText(d){return typeof d==='string'?d.slice(0,300):(d&&(d.message||d.error||d.error_key||JSON.stringify(d).slice(0,300)))||'Unknown error'}
+async function api(key,v={},retry=true){
+  if(!S.token||!S.holder)throw new Error('Add your API key and Holder UID in Settings first.');
+  const e=S.ep[key], wait=Math.max(0,last+1100-Date.now());
+  if(wait)await sleep(wait); last=Date.now();
+  const url=S.base.replace(/\/+$/,'')+fill(e.p,v,'path');
+  const o={method:e.m,headers:{'Authorization':'Bearer '+S.token,'Holder-Uid':S.holder,'Accept':'application/json'}};
+  if(e.m!=='GET'&&e.b){o.headers['Content-Type']='application/json';o.body=fill(e.b,v,'json')}
+  let res,txt;
+  try{res=await fetch(url,o);txt=await res.text()}
+  catch(err){addLog({t:new Date(),m:e.m,url,s:'network error',b:String(err)});throw new Error('Request failed before reaching Warmy (network or CORS). See the request log.')}
+  let d;try{d=JSON.parse(txt)}catch{d=txt}
+  addLog({t:new Date(),m:e.m,url,s:res.status,b:d,sent:o.body});
+  if(res.status===429&&retry){await sleep(((d&&d.retry_after)||5)*1000);return api(key,v,false)}
+  if(!res.ok)throw new Error(res.status+': '+errText(d));
+  return d;
+}
+const arr=(d,keys=[])=>{if(Array.isArray(d))return d;if(d&&typeof d==='object'){for(const k of [...keys,'data','items','results'])if(Array.isArray(d[k]))return d[k];for(const x of Object.values(d))if(Array.isArray(x))return x}return[]};
+const dname=d=>typeof d==='string'?d:(d.name||d.domain||d.domain_name||d.host||'(unknown)');
+const mail=x=>typeof x==='string'?x:(x&&(x.email||x.address))||'';
+const say=(el,t,c='')=>{const n=typeof el==='string'?$(el):el;n.className='msg '+c;n.textContent=t};
+const busy=(b,f)=>async(...a)=>{b.disabled=true;try{await f(...a)}finally{b.disabled=false}};
+
+/* tabs */
+function tab(t){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('on',s.id===t))}
+$('#tabs').onclick=e=>{if(e.target.dataset.t)tab(e.target.dataset.t)};
+
+/* connection */
+function pill(t,c){const p=$('#conn');p.textContent=t;p.className='pill '+c}
+$('#test').onclick=busy($('#test'),async()=>{try{await api('listDomains');pill('Connected','ok')}catch(e){pill('Connection failed','er');say('#dmsg',e.message,'er');tab('log')}});
+
+/* domains */
+function renderDomains(){
+  const q=$('#dq').value.trim().toLowerCase(), rows=D.domains.filter(d=>dname(d).toLowerCase().includes(q));
+  $('#dtable').hidden=!rows.length;
+  $('#dtable tbody').innerHTML=rows.map((d,i)=>{
+    const o=typeof d==='object'?d:{};
+    const sum=['status','state','warmup_status','health_score','score'].filter(k=>o[k]!=null&&typeof o[k]!=='object').map(k=>k+': '+o[k]).join(', ');
+    return `<tr><td class="mono">${esc(dname(d))}</td><td>${esc(sum)||'<span class="mu">-</span>'}<details><summary>Raw data</summary><pre>${esc(JSON.stringify(d,null,2))}</pre></details></td><td><button class="g" data-seed="${esc(dname(d))}">View seeds</button></td></tr>`}).join('');
+  if(D.domains.length)say('#dmsg',`${rows.length} of ${D.domains.length} domains`,'mu');
+}
+async function loadDomains(){
+  say('#dmsg','Loading...','mu');
+  try{D.domains=arr(await api('listDomains'),['domains']);renderDomains();pill('Connected','ok');if(!D.domains.length)say('#dmsg','No domains found for this account.','mu')}
+  catch(e){say('#dmsg',e.message,'er');pill('Connection failed','er')}
+}
+$('#refd').onclick=busy($('#refd'),loadDomains);
+$('#dq').oninput=renderDomains;
+$('#dtable').onclick=e=>{const d=e.target.dataset.seed;if(d){$('#sd').value=d;tab('seeds');loadLists()}};
+$('#addd').onclick=busy($('#addd'),async()=>{
+  const lp=$('#localpart').value.trim().toLowerCase()||'info';
+  const entries=[...new Set($('#newd').value.split('\n').map(s=>s.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'')).filter(Boolean))];
+  if(!entries.length)return say('#addres','Enter at least one domain.','er');
+  say('#addres','Finding the Gmail premium seed list...','mu');
+  let list;
+  try{list=await getPremium()}catch(e){$('#target').textContent='Target list: not found';return say('#addres',e.message,'er')}
+  $('#target').textContent='Target list: '+[list.provider||'Gmail',list.group_name||'premium','id '+list.id].join(' · ');
+  let have=new Set();
+  try{have=new Set(arr(await api('getSeed',{id:list.id}),['senders_list']).map(s=>mail(s).toLowerCase()))}catch(e){}
+  const out=[];
+  for(const n of entries){
+    const email=n.includes('@')?n:lp+'@'+n;
+    if(!/^[^@\s]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(email)){out.push('✗ '+n+' - not a valid domain or email');continue}
+    if(have.has(email)){out.push('- '+email+' is already in the list');continue}
+    try{
+      if($('#alsoDom').checked)await api('addDomain',{domain:email.split('@')[1]});
+      await api('addSender',{id:list.id,email});have.add(email);out.push('✓ '+email+' added to Gmail premium');
+    }catch(e){out.push('✗ '+email+' - '+e.message)}
+    $('#addres').textContent=out.join('\n');
+  }
+  say('#addres',out.join('\n'),out.some(x=>x[0]==='✗')?'':'ok');
+  if($('#alsoDom').checked&&out.some(x=>x[0]==='✓'))loadDomains();
+});
+
+/* Gmail premium target: the only list this app will add to */
+async function getPremium(){
+  const lists=arr(await api('listSeeds'),['users_splits']);
+  D.lists=lists;
+  let hit;
+  if(S.premiumId)hit=lists.find(l=>String(l.id)===String(S.premiumId));
+  else{
+    const m=lists.filter(l=>/gmail/i.test(l.provider||'')&&/premium/i.test(l.group_name||''));
+    if(m.length>1)throw new Error('More than one Gmail premium list matched (ids '+m.map(l=>l.id).join(', ')+'). Enter the correct ID in Settings.');
+    hit=m[0];
+  }
+  if(!hit)throw new Error('No Gmail premium seed list found. Lists on this account: '+(lists.map(l=>[l.provider,l.group_name,'id '+l.id].filter(Boolean).join(' ')).join('; ')||'none')+'. If yours is named differently, enter its ID in Settings.');
+  return hit;
+}
+
+/* seeds */
+async function loadLists(){
+  say('#smsg','Loading seed lists...','mu');
+  try{
+    D.lists=arr(await api('listSeeds'),['users_splits']);
+    $('#sl').innerHTML=D.lists.length?D.lists.map(l=>`<option value="${esc(l.id)}">${esc([l.provider,l.group_name,l.seeds_amount!=null?l.seeds_amount+' seeds':'','id '+l.id].filter(Boolean).join(' · '))}</option>`).join(''):'<option value="">No seed lists</option>';
+    const pr=D.lists.find(l=>S.premiumId?String(l.id)===String(S.premiumId):(/gmail/i.test(l.provider||'')&&/premium/i.test(l.group_name||'')));
+    if(pr)$('#sl').value=String(pr.id);
+    say('#smsg',D.lists.length?`${D.lists.length} seed list(s) found. Choose one and press Load seeds.`:'No seed lists returned for this account.','mu');
+  }catch(e){say('#smsg',e.message,'er')}
+}
+$('#lists').onclick=busy($('#lists'),loadLists);
+const dom=()=>$('#sd').value.trim().toLowerCase().replace(/^@/,'');
+function renderSenders(){
+  const d=dom(), rows=D.senders.filter(s=>!d||String(s.domain||'').toLowerCase()===d||mail(s).toLowerCase().endsWith('@'+d));
+  $('#sendersCard').hidden=false;
+  $('#senders').innerHTML=rows.length?rows.map(s=>`<tr><td class="mono">${esc(mail(s))}</td><td style="text-align:right"><button class="g" data-rm="${esc(s.id)}" data-em="${esc(mail(s))}">Remove</button></td></tr>`).join(''):`<tr><td class="mu">No senders registered${d?' for '+esc(d):''} in this list yet.</td></tr>`;
+}
+function renderSeeds(){
+  const q=$('#sf').value.trim().toLowerCase(), rows=D.seeds.filter(x=>x.toLowerCase().includes(q));
+  $('#seedsCard').hidden=false;
+  $('#scount').textContent=`${rows.length} of ${D.seeds.length} seed addresses`;
+  $('#seedlist').innerHTML=rows.slice(0,1000).map(esc).join('<br>')+(rows.length>1000?'<br><span class="mu">Showing the first 1000. Copy or download for the full set.</span>':'');
+}
+$('#loadseeds').onclick=busy($('#loadseeds'),async()=>{
+  const id=$('#sl').value; if(!id)return say('#smsg','Load and choose a seed list first.','er');
+  D.listId=id;D.seeds=[];D.senders=[];say('#smsg','Loading seeds...','mu');
+  try{
+    try{const g=await api('getSeed',{id});D.senders=arr(g,['senders_list'])}catch(e){say('#smsg','Could not load senders: '+e.message,'er')}
+    let page=1;const per=5000;
+    for(;;){
+      const r=await api('seedEmails',{id,page,per}), items=arr(r,['items']).map(mail).filter(Boolean);
+      D.seeds.push(...items);
+      const p=r&&r.pagination, tp=p&&(p.total_pages||p.totalPages);
+      if(!items.length||(tp?page>=tp:items.length<per)||page>=50)break; page++;
+    }
+    renderSenders();renderSeeds();say('#smsg',`Loaded ${D.seeds.length} seed addresses.`,'ok');
+  }catch(e){say('#smsg',e.message,'er')}
+});
+$('#sf').oninput=renderSeeds;
+$('#sd').oninput=()=>{if(!$('#sendersCard').hidden)renderSenders()};
+$('#addsender').onclick=busy($('#addsender'),async()=>{
+  const email=$('#newsender').value.trim().toLowerCase(), d=dom();
+  if(!D.listId)return say('#smsg2','Load a seed list first.','er');
+  try{const p=await getPremium();if(String(p.id)!==String(D.listId))return say('#smsg2','Senders can only be added to the Gmail premium list (id '+p.id+'). Select that list and load it first.','er')}
+  catch(e){return say('#smsg2',e.message,'er')}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return say('#smsg2','Enter a valid email address.','er');
+  if(d&&!email.endsWith('@'+d))return say('#smsg2','The email must be at '+d+'.','er');
+  try{await api('addSender',{id:D.listId,email});say('#smsg2','Added '+email+'.','ok');$('#newsender').value='';$('#loadseeds').click()}
+  catch(e){say('#smsg2',e.message,'er')}
+});
+$('#senders').onclick=async e=>{
+  const sid=e.target.dataset.rm; if(sid==null)return;
+  if(!confirm('Remove '+e.target.dataset.em+' from this seed list?'))return;
+  try{await api('removeSender',{id:D.listId,sid,email:e.target.dataset.em});say('#smsg2','Removed.','ok');$('#loadseeds').click()}
+  catch(err){say('#smsg2',err.message,'er')}
+};
+const shown=()=>{const q=$('#sf').value.trim().toLowerCase();return D.seeds.filter(x=>x.toLowerCase().includes(q))};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(shown().join('\n'));$('#copy').textContent='Copied'}catch{$('#copy').textContent='Copy failed'}setTimeout(()=>$('#copy').textContent='Copy',1500)};
+$('#csv').onclick=()=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['email\n'+shown().join('\n')],{type:'text/csv'}));
+  a.download='warmy-seeds-'+(dom()||'all')+'.csv';a.click();URL.revokeObjectURL(a.href);
+};
+
+/* settings */
+function renderSettings(){
+  $('#base').value=S.base;$('#token').value=S.token;$('#holder').value=S.holder;$('#premiumId').value=S.premiumId||'';$('#remember').checked=!!S.remember;
+  $('#eps').innerHTML=Object.keys(DEF_EP).map(k=>{const e=S.ep[k]||DEF_EP[k];return `<div class="ep" data-k="${k}"><strong style="font-size:14px">${EP_LABEL[k]}</strong><div class="row"><select class="m" aria-label="Method">${['GET','POST','PUT','PATCH','DELETE'].map(m=>`<option${m===e.m?' selected':''}>${m}</option>`).join('')}</select><input class="p mono" value="${esc(e.p)}" aria-label="Path"></div>${DEF_EP[k].b!=null?`<textarea class="b-body" style="min-height:56px" aria-label="Request body">${esc(e.b||'')}</textarea>`:''}</div>`}).join('');
+}
+$('#save').onclick=()=>{
+  S.base=$('#base').value.trim()||'https://api.warmy.io';S.token=$('#token').value.trim();S.holder=$('#holder').value.trim();S.premiumId=$('#premiumId').value.trim();S.remember=$('#remember').checked;
+  document.querySelectorAll('.ep').forEach(n=>{const k=n.dataset.k;S.ep[k]={m:n.querySelector('select').value,p:n.querySelector('input').value.trim(),b:n.querySelector('textarea')?n.querySelector('textarea').value:undefined}});
+  persist();say('#setmsg','Settings saved.','ok');
+};
+$('#reset').onclick=()=>{S.ep=JSON.parse(JSON.stringify(DEF_EP));renderSettings();say('#setmsg','Endpoints reset. Press Save settings to keep them.','mu')};
+
+/* log */
+function renderLog(){
+  $('#logs').innerHTML=LOG.length?LOG.map(l=>`<div class="card" style="padding:10px 14px"><div class="mono"><span class="${typeof l.s==='number'&&l.s<400?'ok':'er'}">${esc(l.s)}</span> ${esc(l.m)} ${esc(l.url)}</div><div class="mu" style="font-size:12px">${l.t.toLocaleTimeString()}</div><details><summary>Request and response</summary>${l.sent?'<pre>'+esc(l.sent)+'</pre>':''}<pre>${esc(typeof l.b==='string'?l.b.slice(0,4000):JSON.stringify(l.b,null,2).slice(0,4000))}</pre></details></div>`).join(''):'<div class="mu">No requests yet.</div>';
+}
+$('#clog').onclick=()=>{LOG=[];renderLog()};
+
+renderSettings();renderLog();
+if(!S.token||!S.holder)tab('settings');
+</script>
+</body>
+</html>
