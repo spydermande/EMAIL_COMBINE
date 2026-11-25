@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSV Email Combiner — Offline Single-Column Merger</title>
+  <title>CSV Email Combiner &amp; Splitter — Offline Email CSV Utility</title>
   <style>
     /* ==========================================================================
-       Design Tokens & Base Reset (Zero External Dependencies — 100% Offline)
+       Design Tokens & Base Reset (100% Zero-Dependency Offline Styling)
        ========================================================================== */
     :root {
       --bg-page: #f8fafc;
@@ -24,6 +24,7 @@
       --accent: #4f46e5;
       --accent-hover: #4338ca;
       --accent-soft: #eef2ff;
+      --accent-border: #c7d2fe;
       --accent-ring: rgba(79, 70, 229, 0.2);
 
       --success: #059669;
@@ -34,8 +35,9 @@
       --danger-bg: #fef2f2;
       --danger-border: #fecaca;
 
-      --warning: #d97706;
+      --warning: #b45309;
       --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
 
       --radius-sm: 8px;
       --radius-md: 12px;
@@ -45,7 +47,7 @@
       --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
       --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
       --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
-      --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.1), 0 4px 10px rgba(15, 23, 42, 0.05);
+      --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.06);
 
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -75,19 +77,19 @@
     }
 
     /* ==========================================================================
-       Layout Shell & Header
+       Header & Page Shell
        ========================================================================== */
     .app-header {
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-light);
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 25;
       box-shadow: var(--shadow-xs);
     }
 
     .header-inner {
-      max-width: 1180px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 14px 20px;
       display: flex;
@@ -132,6 +134,13 @@
       color: var(--text-muted);
     }
 
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .privacy-badge {
       display: inline-flex;
       align-items: center;
@@ -147,9 +156,9 @@
     }
 
     .main-container {
-      max-width: 1180px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 20px 48px;
+      padding: 22px 20px 52px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -183,7 +192,7 @@
 
     .stat-card.highlight {
       background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
-      border-color: #c7d2fe;
+      border-color: var(--accent-border);
     }
 
     .stat-header {
@@ -194,7 +203,7 @@
     }
 
     .stat-label {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -241,7 +250,7 @@
     }
 
     /* ==========================================================================
-       Two-Column Workspace
+       Two-Column Combine Workspace
        ========================================================================== */
     .workspace {
       display: grid;
@@ -258,7 +267,7 @@
     }
 
     /* ==========================================================================
-       Card Components
+       Card Surfaces & Headers
        ========================================================================== */
     .card {
       background: var(--bg-surface);
@@ -266,6 +275,11 @@
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
       overflow: hidden;
+    }
+
+    .card-accent {
+      border-color: var(--accent-border);
+      box-shadow: var(--shadow-md);
     }
 
     .card-header {
@@ -278,11 +292,31 @@
       flex-wrap: wrap;
     }
 
+    .card-accent .card-header {
+      background: linear-gradient(90deg, #f8faff 0%, #ffffff 100%);
+      border-bottom-color: #e0e7ff;
+    }
+
     .card-title-group {
       display: flex;
       align-items: center;
       gap: 10px;
       min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.76rem;
+      font-weight: 700;
+      flex-shrink: 0;
     }
 
     .card-title {
@@ -304,6 +338,12 @@
       background: var(--bg-subtle);
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .badge-pill-accent {
+      background: var(--accent-soft);
+      color: var(--accent);
     }
 
     .card-body {
@@ -321,7 +361,7 @@
       padding: 10px 16px;
       border-radius: var(--radius-sm);
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.87rem;
       border: 1px solid transparent;
       cursor: pointer;
       transition: background-color var(--transition), border-color var(--transition),
@@ -330,6 +370,7 @@
       line-height: 1.2;
       min-height: 40px;
       user-select: none;
+      white-space: nowrap;
     }
 
     .btn:focus-visible {
@@ -342,8 +383,15 @@
     }
 
     .btn:disabled {
-      opacity: 0.5;
+      opacity: 0.48;
       cursor: not-allowed;
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      min-height: 34px;
+      font-size: 0.8rem;
+      gap: 6px;
     }
 
     .btn-primary {
@@ -354,7 +402,7 @@
 
     .btn-primary:hover:not(:disabled) {
       background: var(--accent-hover);
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.26);
     }
 
     .btn-secondary {
@@ -367,6 +415,16 @@
     .btn-secondary:hover:not(:disabled) {
       background: var(--bg-subtle);
       border-color: #94a3b8;
+    }
+
+    .btn-soft {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+
+    .btn-soft:hover:not(:disabled) {
+      background: #e0e7ff;
     }
 
     .btn-success-state {
@@ -391,8 +449,8 @@
       background: transparent;
       border: none;
       color: var(--accent);
-      padding: 4px 8px;
-      min-height: 30px;
+      padding: 5px 9px;
+      min-height: 32px;
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
@@ -411,7 +469,7 @@
       border: 2px dashed var(--border-strong);
       border-radius: var(--radius-md);
       background: #fafbff;
-      padding: 28px 20px;
+      padding: 24px 18px;
       text-align: center;
       cursor: pointer;
       transition: border-color var(--transition), background-color var(--transition),
@@ -419,7 +477,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     .drop-zone:hover {
@@ -434,8 +492,8 @@
     }
 
     .drop-icon {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: var(--radius-full);
       background: var(--accent-soft);
       color: var(--accent);
@@ -451,14 +509,14 @@
 
     .drop-title {
       margin: 0;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-primary);
     }
 
     .drop-hint {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 0.81rem;
       color: var(--text-muted);
       max-width: 340px;
     }
@@ -497,7 +555,7 @@
     }
 
     .file-list-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
@@ -511,7 +569,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 260px;
+      max-height: 230px;
       overflow-y: auto;
       padding-right: 2px;
     }
@@ -520,7 +578,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       padding: 10px 12px;
       background: var(--bg-page);
       border: 1px solid var(--border-light);
@@ -558,7 +616,7 @@
     }
 
     .file-name {
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-primary);
       white-space: nowrap;
@@ -567,11 +625,11 @@
     }
 
     .file-details {
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
       margin-top: 2px;
     }
@@ -602,13 +660,13 @@
     }
 
     /* ==========================================================================
-       Options & Configuration Form
+       Options & Output Settings Form
        ========================================================================== */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .form-field {
@@ -623,6 +681,26 @@
       color: var(--text-secondary);
     }
 
+    .input-with-suffix {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-with-suffix .text-input {
+      padding-right: 46px;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+      user-select: none;
+    }
+
     .text-input {
       width: 100%;
       padding: 9px 12px;
@@ -630,7 +708,7 @@
       border-radius: var(--radius-sm);
       background: var(--bg-surface);
       color: var(--text-primary);
-      font-size: 0.88rem;
+      font-size: 0.87rem;
       transition: border-color var(--transition), box-shadow var(--transition);
       min-height: 40px;
     }
@@ -641,10 +719,16 @@
       box-shadow: 0 0 0 3px var(--accent-ring);
     }
 
+    .field-hint {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
     .options-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .toggle-row {
@@ -708,20 +792,20 @@
     }
 
     .toggle-title {
-      font-size: 0.87rem;
+      font-size: 0.86rem;
       font-weight: 600;
       color: var(--text-primary);
       line-height: 1.3;
     }
 
     .toggle-desc {
-      font-size: 0.77rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       line-height: 1.35;
     }
 
     /* ==========================================================================
-       Export Bar & Preview Panel
+       Combined Export Bar & Searchable Preview
        ========================================================================== */
     .export-bar {
       background: var(--bg-surface);
@@ -764,8 +848,8 @@
     .search-box {
       position: relative;
       flex: 1;
-      max-width: 260px;
-      min-width: 170px;
+      max-width: 250px;
+      min-width: 165px;
     }
 
     .search-icon {
@@ -826,7 +910,7 @@
       padding: 10px 20px;
       background: var(--bg-page);
       border-bottom: 1px solid var(--border-light);
-      font-size: 0.8rem;
+      font-size: 0.79rem;
       color: var(--text-secondary);
       display: flex;
       align-items: center;
@@ -836,7 +920,7 @@
     }
 
     .preview-table-wrap {
-      max-height: 460px;
+      max-height: 410px;
       overflow-y: auto;
       overflow-x: auto;
     }
@@ -856,7 +940,7 @@
       color: var(--text-secondary);
       font-weight: 700;
       font-size: 0.78rem;
-      padding: 11px 16px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border-light);
       white-space: nowrap;
     }
@@ -868,7 +952,7 @@
     }
 
     .preview-table tbody td {
-      padding: 9px 16px;
+      padding: 8.5px 16px;
       border-bottom: 1px solid #f1f5f9;
       color: var(--text-primary);
       word-break: break-all;
@@ -896,42 +980,42 @@
     }
 
     .empty-state {
-      padding: 56px 24px;
+      padding: 46px 24px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       color: var(--text-muted);
     }
 
     .empty-state-icon {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       border-radius: var(--radius-full);
       background: var(--bg-subtle);
       color: var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .empty-state h3 {
       margin: 0;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-primary);
     }
 
     .empty-state p {
       margin: 0;
-      font-size: 0.84rem;
-      max-width: 340px;
+      font-size: 0.83rem;
+      max-width: 380px;
     }
 
     .more-indicator {
-      padding: 12px 20px;
+      padding: 11px 20px;
       text-align: center;
       font-size: 0.8rem;
       color: var(--text-secondary);
@@ -940,10 +1024,320 @@
     }
 
     /* ==========================================================================
+       Dedicated Section: Split Final Emails
+       ========================================================================== */
+    .split-controls-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .split-config-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Segmented Mode Selector */
+    .segmented-control {
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      background: var(--bg-subtle);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      gap: 4px;
+      width: 100%;
+    }
+
+    .segment-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 9px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background-color var(--transition), color var(--transition), box-shadow var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 38px;
+    }
+
+    .segment-btn:hover:not(.active) {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .segment-btn.active {
+      background: var(--bg-surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-xs);
+    }
+
+    .segment-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .split-input-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .split-number-field {
+      flex: 0 0 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .split-number-input {
+      font-size: 1rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .split-presets-wrap {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preset-chips {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .preset-chip {
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      min-height: 36px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .preset-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+    }
+
+    .split-error-hint {
+      font-size: 0.78rem;
+      color: var(--danger);
+      font-weight: 500;
+      display: none;
+    }
+
+    .split-error-hint.visible {
+      display: block;
+    }
+
+    /* Split Summary & ZIP Download Panel */
+    .split-summary-box {
+      background: linear-gradient(180deg, #f8faff 0%, #eef2ff 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .split-summary-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .split-summary-kicker {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .split-summary-text {
+      margin: 0;
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    .split-summary-sub {
+      margin: 0;
+      font-size: 0.79rem;
+      color: var(--text-secondary);
+    }
+
+    .split-zip-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .split-zip-actions .btn-primary {
+      flex: 1;
+      min-width: 210px;
+    }
+
+    /* Split Chunks Grid */
+    .split-divider {
+      height: 1px;
+      background: var(--border-light);
+      margin: 20px 0 16px;
+    }
+
+    .split-chunks-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .split-chunks-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .split-guard-notice {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 14px;
+      display: none;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .split-guard-notice.visible {
+      display: flex;
+    }
+
+    .split-chunks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      max-height: 440px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .chunk-card {
+      background: var(--bg-page);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color var(--transition), background-color var(--transition), box-shadow var(--transition);
+    }
+
+    .chunk-card:hover {
+      border-color: var(--accent-border);
+      background: #ffffff;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .chunk-info {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chunk-top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .chunk-filename {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chunk-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .chunk-count-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 8px;
+      border-radius: var(--radius-full);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.73rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chunk-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
        Footer & Toast Notifications
        ========================================================================== */
     .app-footer {
-      max-width: 1180px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px 32px;
       text-align: center;
@@ -955,7 +1349,7 @@
       position: fixed;
       right: 20px;
       bottom: 20px;
-      z-index: 50;
+      z-index: 60;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -1015,8 +1409,16 @@
     /* ==========================================================================
        Responsive Breakpoints
        ========================================================================== */
-    @media (max-width: 960px) {
+    @media (max-width: 980px) {
       .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .split-controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .split-chunks-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1025,18 +1427,17 @@
       }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 620px) {
       .header-inner {
-        padding: 12px 16px;
+        padding: 12px 14px;
       }
 
       .main-container {
-        padding: 16px 14px 36px;
+        padding: 16px 14px 40px;
         gap: 16px;
       }
 
       .stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
 
@@ -1069,11 +1470,28 @@
         max-width: none;
         width: 100%;
       }
+
+      .split-number-field {
+        flex: 1 1 100%;
+      }
+
+      .chunk-card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .chunk-actions {
+        width: 100%;
+      }
+
+      .chunk-actions .btn {
+        flex: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Top Header with Brand Identity and Local Privacy Assurance -->
+  <!-- Sticky Top Application Header -->
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
@@ -1084,24 +1502,26 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>CSV Email Combiner</h1>
-          <p>Merge multiple email CSV files into one clean single-column file</p>
+          <h1>CSV Email Combiner &amp; Splitter</h1>
+          <p>Combine multiple email CSVs into one clean column &amp; split into custom-sized files</p>
         </div>
       </div>
 
-      <div class="privacy-badge" title="All CSV parsing and merging happens strictly in your browser memory.">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          <path d="M9 12l2 2 4-4"></path>
-        </svg>
-        <span>100% Local &amp; Offline</span>
+      <div class="header-badges">
+        <div class="privacy-badge" title="All CSV parsing, merging, splitting, and ZIP creation run strictly inside your browser.">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="M9 12l2 2 4-4"></path>
+          </svg>
+          <span>100% Offline &amp; Private</span>
+        </div>
       </div>
     </div>
   </header>
 
   <main class="main-container">
-    <!-- Live Summary Statistics Cards -->
-    <section class="stats-grid" aria-label="Combine summary statistics">
+    <!-- Live Summary Stat Cards -->
+    <section class="stats-grid" aria-label="Email processing summary">
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-label">Files Loaded</span>
@@ -1118,7 +1538,7 @@
 
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-label">Total Extracted</span>
+          <span class="stat-label">Total Raw Rows</span>
           <span class="stat-icon" aria-hidden="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -1130,26 +1550,13 @@
             </svg>
           </span>
         </div>
-        <div class="stat-value" id="statExtracted">0</div>
+        <div class="stat-value" id="statRawRows">0</div>
         <div class="stat-sub">First-column data rows</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Duplicates / Skipped</span>
-          <span class="stat-icon" aria-hidden="true">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-            </svg>
-          </span>
-        </div>
-        <div class="stat-value" id="statRemoved">0</div>
-        <div class="stat-sub" id="statRemovedSub">No rows filtered yet</div>
       </div>
 
       <div class="stat-card highlight">
         <div class="stat-header">
-          <span class="stat-label">Final Emails Ready</span>
+          <span class="stat-label">Final Clean Emails</span>
           <span class="stat-icon" aria-hidden="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
@@ -1157,19 +1564,33 @@
           </span>
         </div>
         <div class="stat-value" id="statFinal">0</div>
-        <div class="stat-sub" id="statFinalSub">Ready for CSV export</div>
+        <div class="stat-sub" id="statFinalSub">Ready for export or split</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-label">Removed</span>
+          <span class="stat-icon" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+          </span>
+        </div>
+        <div class="stat-value" id="statRemoved">0</div>
+        <div class="stat-sub" id="statRemovedSub">Duplicates / empty / invalid</div>
       </div>
     </section>
 
-    <!-- Primary Two-Column Workspace -->
+    <!-- Primary Two-Column Workspace: Upload & Options (Left) + Export & Preview (Right) -->
     <div class="workspace">
-      <!-- Left Column: File Upload & Combine Settings -->
+      <!-- Left Column -->
       <div class="column-stack">
-        <!-- Upload Card -->
+        <!-- Step 1: Multi-File CSV Upload -->
         <section class="card" aria-labelledby="uploadHeading">
           <div class="card-header">
             <div class="card-title-group">
-              <h2 class="card-title" id="uploadHeading">1. Upload CSV Files</h2>
+              <span class="step-badge" aria-hidden="true">1</span>
+              <h2 class="card-title" id="uploadHeading">Upload CSV Files</h2>
               <span class="badge-pill" id="fileCountPill">0 files</span>
             </div>
             <button type="button" class="btn btn-ghost-danger" id="clearAllBtn" style="display: none;">
@@ -1187,14 +1608,14 @@
             <!-- Drag & Drop Zone -->
             <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Drag and drop CSV files here or press Enter to browse">
               <div class="drop-icon" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="17 8 12 3 7 8"></polyline>
                   <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
               </div>
               <p class="drop-title">Drop your CSV files here</p>
-              <p class="drop-hint">Reads only the first column from each file and skips every file's header row automatically. Add more batches anytime.</p>
+              <p class="drop-hint">Extracts only the first column from each CSV and skips every file's header row automatically. Add multiple batches anytime.</p>
               <div class="drop-actions">
                 <button type="button" class="btn btn-primary" id="browseBtn">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1202,7 +1623,7 @@
                   </svg>
                   Select CSV Files
                 </button>
-                <button type="button" class="btn-link" id="loadSampleBtn">Load sample CSVs</button>
+                <button type="button" class="btn-link" id="loadSampleBtn">Load Sample CSVs</button>
               </div>
               <input
                 type="file"
@@ -1224,10 +1645,13 @@
           </div>
         </section>
 
-        <!-- Options & Output Settings Card -->
+        <!-- Step 2: Combine & Filtering Settings -->
         <section class="card" aria-labelledby="optionsHeading">
           <div class="card-header">
-            <h2 class="card-title" id="optionsHeading">2. Combine &amp; Output Settings</h2>
+            <div class="card-title-group">
+              <span class="step-badge" aria-hidden="true">2</span>
+              <h2 class="card-title" id="optionsHeading">Combine &amp; Filter Options</h2>
+            </div>
           </div>
 
           <div class="card-body">
@@ -1242,18 +1666,23 @@
                   placeholder="email name"
                   autocomplete="off"
                 />
+                <span class="field-hint">Used on combined &amp; every split CSV</span>
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="fileNameInput">Output Filename</label>
-                <input
-                  type="text"
-                  id="fileNameInput"
-                  class="text-input"
-                  value="combined_emails.csv"
-                  placeholder="combined_emails.csv"
-                  autocomplete="off"
-                />
+                <label class="form-label" for="baseNameInput">Output Base Filename</label>
+                <div class="input-with-suffix">
+                  <input
+                    type="text"
+                    id="baseNameInput"
+                    class="text-input"
+                    value="combined_emails"
+                    placeholder="combined_emails"
+                    autocomplete="off"
+                  />
+                  <span class="input-suffix">.csv</span>
+                </div>
+                <span class="field-hint" id="baseNamePreviewHint">Split files: combined_emails_part1.csv</span>
               </div>
             </div>
 
@@ -1269,15 +1698,15 @@
               <label class="toggle-row" for="optTrimEmpty">
                 <input type="checkbox" id="optTrimEmpty" class="toggle-checkbox" checked />
                 <span class="toggle-text">
-                  <span class="toggle-title">Skip empty rows &amp; trim whitespace</span>
-                  <span class="toggle-desc">Removes blank entries and leading/trailing spaces</span>
+                  <span class="toggle-title">Trim whitespace &amp; skip empty rows</span>
+                  <span class="toggle-desc">Strips extra spaces and removes blank rows</span>
                 </span>
               </label>
 
               <label class="toggle-row" for="optSort">
                 <input type="checkbox" id="optSort" class="toggle-checkbox" />
                 <span class="toggle-text">
-                  <span class="toggle-title">Sort emails alphabetically (A–Z)</span>
+                  <span class="toggle-title">Sort alphabetically (A–Z)</span>
                   <span class="toggle-desc">Orders the final combined column in ascending order</span>
                 </span>
               </label>
@@ -1285,8 +1714,8 @@
               <label class="toggle-row" for="optValidOnly">
                 <input type="checkbox" id="optValidOnly" class="toggle-checkbox" />
                 <span class="toggle-text">
-                  <span class="toggle-title">Include only valid email format</span>
-                  <span class="toggle-desc">Filters out entries that do not match a standard email address</span>
+                  <span class="toggle-title">Validate email format</span>
+                  <span class="toggle-desc">Filters out malformed or non-email entries</span>
                 </span>
               </label>
             </div>
@@ -1294,25 +1723,25 @@
         </section>
       </div>
 
-      <!-- Right Column: Export Actions & Live Preview -->
+      <!-- Right Column: Combined Export Bar + Live Searchable Preview -->
       <div class="column-stack">
-        <!-- Export Action Bar -->
-        <section class="export-bar" aria-label="Export actions">
+        <!-- Combined File Export Action Bar -->
+        <section class="export-bar" aria-label="Full combined CSV export actions">
           <div class="export-info">
             <span class="export-title" id="exportHeadline">Ready to combine your CSVs</span>
-            <span class="export-subtitle" id="exportSubtext">Upload one or more CSV files to generate your combined list.</span>
+            <span class="export-subtitle" id="exportSubtext">Upload CSV files or load sample data to begin.</span>
           </div>
 
           <div class="export-actions">
-            <button type="button" class="btn btn-secondary" id="copyBtn" disabled>
+            <button type="button" class="btn btn-secondary" id="copyAllBtn" disabled>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
-              <span id="copyBtnLabel">Copy Emails</span>
+              <span id="copyAllLabel">Copy All Emails</span>
             </button>
 
-            <button type="button" class="btn btn-primary" id="downloadBtn" disabled>
+            <button type="button" class="btn btn-primary" id="downloadCombinedBtn" disabled>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -1323,11 +1752,12 @@
           </div>
         </section>
 
-        <!-- Live Preview Card -->
+        <!-- Searchable Live Preview of Combined Emails -->
         <section class="card" aria-labelledby="previewHeading">
           <div class="card-header">
             <div class="card-title-group">
-              <h2 class="card-title" id="previewHeading">3. Live Combined Preview</h2>
+              <span class="step-badge" aria-hidden="true">3</span>
+              <h2 class="card-title" id="previewHeading">Live Combined Preview</h2>
               <span class="badge-pill" id="previewCountPill">0 rows</span>
             </div>
 
@@ -1340,7 +1770,7 @@
                 type="text"
                 id="searchInput"
                 class="search-input"
-                placeholder="Filter preview..."
+                placeholder="Search emails..."
                 aria-label="Filter preview emails"
                 autocomplete="off"
               />
@@ -1355,14 +1785,13 @@
 
           <div class="preview-meta-bar" id="previewMetaBar" style="display: none;">
             <span id="previewMetaLeft">Showing 0 entries</span>
-            <span id="previewMetaRight">Single column output</span>
+            <span id="previewMetaRight">Column: email name</span>
           </div>
 
-          <div class="preview-table-wrap" id="previewTableWrap">
-            <!-- Empty state rendered initially -->
+          <div class="preview-table-wrap">
             <div class="empty-state" id="emptyState">
               <div class="empty-state-icon" aria-hidden="true">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
                   <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -1370,7 +1799,7 @@
                 </svg>
               </div>
               <h3>No CSV files loaded yet</h3>
-              <p>Drop multiple CSV files on the left or click "Load sample CSVs" to preview your single-column merged email list.</p>
+              <p>Drop multiple CSV files on the left or click "Load Sample CSVs" to preview your single-column combined email list.</p>
             </div>
 
             <table class="preview-table" id="previewTable" style="display: none;">
@@ -1388,10 +1817,146 @@
         </section>
       </div>
     </div>
+
+    <!-- ========================================================================
+         DEDICATED SECTION: Step 4 — Split Final Emails
+         ======================================================================== -->
+    <section class="card card-accent" id="splitSection" aria-labelledby="splitHeading">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="step-badge" aria-hidden="true">4</span>
+          <h2 class="card-title" id="splitHeading">Split Final Emails</h2>
+          <span class="badge-pill badge-pill-accent" id="splitPartsPill">0 files</span>
+        </div>
+        <span class="field-hint">Each split CSV automatically includes the header row</span>
+      </div>
+
+      <div class="card-body">
+        <div class="split-controls-grid">
+          <!-- Left Side: Split Mode Selector, Value Input & Quick Presets -->
+          <div class="split-config-panel">
+            <div class="segmented-control" role="tablist" aria-label="Split mode">
+              <button
+                type="button"
+                class="segment-btn active"
+                id="modePerFileBtn"
+                role="tab"
+                aria-selected="true"
+                data-mode="perFile"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="7" rx="1"></rect>
+                  <rect x="3" y="14" width="18" height="7" rx="1"></rect>
+                </svg>
+                Emails per file
+              </button>
+              <button
+                type="button"
+                class="segment-btn"
+                id="modeNumFilesBtn"
+                role="tab"
+                aria-selected="false"
+                data-mode="numFiles"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M16 3h5v5"></path>
+                  <path d="M8 3H3v5"></path>
+                  <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"></path>
+                  <path d="m15 9 6-6"></path>
+                </svg>
+                Number of files
+              </button>
+            </div>
+
+            <div class="split-input-row">
+              <div class="split-number-field">
+                <label class="form-label" for="splitValueInput" id="splitValueLabel">Emails per file</label>
+                <input
+                  type="number"
+                  id="splitValueInput"
+                  class="text-input split-number-input"
+                  min="1"
+                  step="1"
+                  value="250"
+                  inputmode="numeric"
+                />
+              </div>
+
+              <div class="split-presets-wrap">
+                <span class="form-label" id="splitPresetsLabel">Quick presets</span>
+                <div class="preset-chips" id="presetChips"></div>
+              </div>
+            </div>
+
+            <div class="split-error-hint" id="splitErrorHint" role="alert">
+              Please enter a whole number of 1 or greater.
+            </div>
+          </div>
+
+          <!-- Right Side: Live Split Breakdown Banner & Single-ZIP Download CTA -->
+          <div class="split-summary-box">
+            <div class="split-summary-header">
+              <span class="split-summary-kicker">Live Split Plan</span>
+              <span class="badge-pill" id="splitHeaderBadge">Header: email name</span>
+            </div>
+            <p class="split-summary-text" id="splitSummaryText">
+              Upload CSV files to split your combined email list.
+            </p>
+            <p class="split-summary-sub" id="splitSummarySub">
+              All split CSV files can be downloaded together inside a single .ZIP archive or individually below.
+            </p>
+            <div class="split-zip-actions">
+              <button type="button" class="btn btn-primary" id="downloadZipBtn" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span id="downloadZipLabel">Download All Split Files (.ZIP)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="split-divider"></div>
+
+        <!-- Generated Split Chunks Header & Performance Guard Notice -->
+        <div class="split-chunks-header" id="splitChunksHeader" style="display: none;">
+          <span class="split-chunks-title" id="splitChunksTitle">Generated Split Files</span>
+          <span class="field-hint" id="splitChunksRangeHint">Click any file to download CSV or copy emails</span>
+        </div>
+
+        <div class="split-guard-notice" id="splitGuardNotice" role="status">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="splitGuardText"></span>
+        </div>
+
+        <!-- Empty State for Split Section -->
+        <div class="empty-state" id="splitEmptyState" style="padding: 28px 16px;">
+          <div class="empty-state-icon" aria-hidden="true">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 3h5v5"></path>
+              <path d="M8 3H3v5"></path>
+              <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"></path>
+              <path d="m15 9 6-6"></path>
+            </svg>
+          </div>
+          <h3>No split files generated yet</h3>
+          <p>Once your combined list has emails, choose "Emails per file" (e.g., 250) or "Number of files" above to generate downloadable split CSVs.</p>
+        </div>
+
+        <!-- Generated Split Chunks Grid -->
+        <div class="split-chunks-grid" id="splitChunksGrid" style="display: none;"></div>
+      </div>
+    </section>
   </main>
 
   <footer class="app-footer">
-    Privacy Note: All file reading, CSV parsing, deduplication, and export happen strictly inside your web browser. No data is ever uploaded to any server.
+    Privacy Note: All file reading, RFC-4180 CSV parsing, deduplication, splitting, and ZIP packaging run 100% locally in your browser with zero external requests.
   </footer>
 
   <!-- Toast Notification Container -->
@@ -1405,6 +1970,11 @@
          Constants & Application State
          ======================================================================== */
       const MAX_PREVIEW_ROWS = 100;
+      const MAX_SPLIT_PREVIEW_PARTS = 100;
+      const PRESETS = {
+        perFile: [10, 100, 250, 500, 1000],
+        numFiles: [2, 3, 4, 5, 10]
+      };
       const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
       const state = {
@@ -1413,20 +1983,32 @@
         /** @type {string[]} */
         combinedEmails: [],
         stats: {
-          totalExtracted: 0,
+          totalRawRows: 0,
           emptyRemoved: 0,
           invalidRemoved: 0,
           duplicatesRemoved: 0,
           totalRemoved: 0
         },
         searchQuery: '',
-        nextFileId: 1
+        nextFileId: 1,
+
+        // Split feature state
+        splitMode: 'perFile', // 'perFile' | 'numFiles'
+        splitValues: {
+          perFile: 250,
+          numFiles: 2
+        },
+        splitInputValid: true,
+        /** @type {Array<{partNumber: number, startIndex: number, endIndex: number, count: number, filename: string}>} */
+        splitChunks: [],
+        splitCappedFromRequested: false
       };
 
       /* ========================================================================
          DOM References
          ======================================================================== */
       const els = {
+        // Upload & File List
         dropZone: document.getElementById('dropZone'),
         fileInput: document.getElementById('fileInput'),
         browseBtn: document.getElementById('browseBtn'),
@@ -1437,26 +2019,30 @@
         fileListWrapper: document.getElementById('fileListWrapper'),
         fileList: document.getElementById('fileList'),
 
+        // Combine & Filter Settings
         headerNameInput: document.getElementById('headerNameInput'),
-        fileNameInput: document.getElementById('fileNameInput'),
+        baseNameInput: document.getElementById('baseNameInput'),
+        baseNamePreviewHint: document.getElementById('baseNamePreviewHint'),
         optDedupe: document.getElementById('optDedupe'),
         optTrimEmpty: document.getElementById('optTrimEmpty'),
         optSort: document.getElementById('optSort'),
         optValidOnly: document.getElementById('optValidOnly'),
 
+        // Stats
         statFiles: document.getElementById('statFiles'),
         statFilesSub: document.getElementById('statFilesSub'),
-        statExtracted: document.getElementById('statExtracted'),
-        statRemoved: document.getElementById('statRemoved'),
-        statRemovedSub: document.getElementById('statRemovedSub'),
+        statRawRows: document.getElementById('statRawRows'),
         statFinal: document.getElementById('statFinal'),
         statFinalSub: document.getElementById('statFinalSub'),
+        statRemoved: document.getElementById('statRemoved'),
+        statRemovedSub: document.getElementById('statRemovedSub'),
 
+        // Combined Export & Preview
         exportHeadline: document.getElementById('exportHeadline'),
         exportSubtext: document.getElementById('exportSubtext'),
-        copyBtn: document.getElementById('copyBtn'),
-        copyBtnLabel: document.getElementById('copyBtnLabel'),
-        downloadBtn: document.getElementById('downloadBtn'),
+        copyAllBtn: document.getElementById('copyAllBtn'),
+        copyAllLabel: document.getElementById('copyAllLabel'),
+        downloadCombinedBtn: document.getElementById('downloadCombinedBtn'),
 
         previewCountPill: document.getElementById('previewCountPill'),
         searchInput: document.getElementById('searchInput'),
@@ -1469,21 +2055,43 @@
         previewHeaderCell: document.getElementById('previewHeaderCell'),
         previewTbody: document.getElementById('previewTbody'),
         moreIndicator: document.getElementById('moreIndicator'),
+
+        // Split Final Emails Section
+        splitPartsPill: document.getElementById('splitPartsPill'),
+        modePerFileBtn: document.getElementById('modePerFileBtn'),
+        modeNumFilesBtn: document.getElementById('modeNumFilesBtn'),
+        splitValueLabel: document.getElementById('splitValueLabel'),
+        splitValueInput: document.getElementById('splitValueInput'),
+        presetChips: document.getElementById('presetChips'),
+        splitErrorHint: document.getElementById('splitErrorHint'),
+        splitHeaderBadge: document.getElementById('splitHeaderBadge'),
+        splitSummaryText: document.getElementById('splitSummaryText'),
+        splitSummarySub: document.getElementById('splitSummarySub'),
+        downloadZipBtn: document.getElementById('downloadZipBtn'),
+        downloadZipLabel: document.getElementById('downloadZipLabel'),
+        splitChunksHeader: document.getElementById('splitChunksHeader'),
+        splitChunksTitle: document.getElementById('splitChunksTitle'),
+        splitGuardNotice: document.getElementById('splitGuardNotice'),
+        splitGuardText: document.getElementById('splitGuardText'),
+        splitEmptyState: document.getElementById('splitEmptyState'),
+        splitChunksGrid: document.getElementById('splitChunksGrid'),
+
+        // Toasts
         toastContainer: document.getElementById('toastContainer')
       };
 
       /* ========================================================================
          RFC-4180 Compliant First-Column CSV Parser
-         Handles BOM, quoted fields, commas inside quotes, escaped quotes (""),
-         embedded newlines inside quotes, CRLF/LF/CR endings, and trailing empty lines.
+         Handles UTF-8 BOM, quoted values, commas inside quotes, escaped quotes (""),
+         embedded newlines inside quotes, CRLF/LF/CR line endings, and trailing blanks.
          ======================================================================== */
       function parseCsvFirstColumn(rawText) {
         if (!rawText || typeof rawText !== 'string') {
           return { detectedHeader: '', rows: [] };
         }
 
-        // Remove UTF-8 BOM if present
-        let text = rawText.charCodeAt(0) === 0xFEFF ? rawText.slice(1) : rawText;
+        // Strip UTF-8 BOM if present
+        const text = rawText.charCodeAt(0) === 0xFEFF ? rawText.slice(1) : rawText;
         const len = text.length;
 
         const firstColumnEntries = [];
@@ -1499,24 +2107,21 @@
 
           if (inQuotes) {
             if (ch === '"') {
-              // Escaped double quote ("") inside a quoted field
+              // Escaped double quote ("") inside quoted field
               if (i + 1 < len && text[i + 1] === '"') {
                 if (colIndex === 0) field += '"';
                 i += 2;
                 continue;
               }
-              // Closing quote
               inQuotes = false;
               i++;
               continue;
             }
-            // Any character (including commas & newlines) inside quotes
             if (colIndex === 0) field += ch;
             i++;
             continue;
           }
 
-          // Not currently inside quotes
           if (atFieldStart && ch === '"') {
             inQuotes = true;
             atFieldStart = false;
@@ -1540,7 +2145,6 @@
             atFieldStart = true;
             rowStarted = false;
 
-            // Consume CRLF as a single line ending
             if (ch === '\r' && i + 1 < len && text[i + 1] === '\n') {
               i += 2;
             } else {
@@ -1557,12 +2161,11 @@
           i++;
         }
 
-        // Capture final line if file did not terminate with a newline
         if (rowStarted) {
           firstColumnEntries.push(field);
         }
 
-        // Strip trailing purely empty lines at end of file
+        // Trim trailing empty newline artifacts at end of file
         while (
           firstColumnEntries.length > 1 &&
           firstColumnEntries[firstColumnEntries.length - 1] === ''
@@ -1574,15 +2177,133 @@
           return { detectedHeader: '', rows: [] };
         }
 
-        // Automatically skip the first row (header row) of every file
-        const detectedHeader = firstColumnEntries[0].trim();
-        const rows = firstColumnEntries.slice(1);
-
-        return { detectedHeader, rows };
+        // Automatically skip the first row (header row) of every uploaded CSV
+        return {
+          detectedHeader: firstColumnEntries[0].trim(),
+          rows: firstColumnEntries.slice(1)
+        };
       }
 
       /* ========================================================================
-         Formatting & Utility Helpers
+         Pure Vanilla JS Zero-Dependency ZIP Generator (STORE Method + CRC-32)
+         Implements PKWARE APPNOTE ZIP specification with UTF-8 filenames & DOS timestamps.
+         ======================================================================== */
+      const CRC32_TABLE = (function buildCrc32Table() {
+        const table = new Uint32Array(256);
+        for (let i = 0; i < 256; i++) {
+          let c = i;
+          for (let k = 0; k < 8; k++) {
+            c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          }
+          table[i] = c >>> 0;
+        }
+        return table;
+      })();
+
+      function computeCrc32(bytes) {
+        let crc = 0xFFFFFFFF;
+        for (let i = 0; i < bytes.length; i++) {
+          crc = CRC32_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+        }
+        return (crc ^ 0xFFFFFFFF) >>> 0;
+      }
+
+      function getDosDateTime(dateObj) {
+        const year = Math.max(1980, dateObj.getFullYear());
+        const month = dateObj.getMonth() + 1;
+        const day = dateObj.getDate();
+        const hours = dateObj.getHours();
+        const minutes = dateObj.getMinutes();
+        const seconds = dateObj.getSeconds();
+
+        const dosTime = ((hours & 0x1F) << 11) | ((minutes & 0x3F) << 5) | ((seconds >> 1) & 0x1F);
+        const dosDate = (((year - 1980) & 0x7F) << 9) | ((month & 0x0F) << 5) | (day & 0x1F);
+        return { dosTime, dosDate };
+      }
+
+      /**
+       * Creates an uncompressed (STORE) .ZIP Blob from an array of { filename, content } entries.
+       * @param {Array<{filename: string, content: string}>} entries
+       * @returns {Blob}
+       */
+      function createStoreZipBlob(entries) {
+        const encoder = new TextEncoder();
+        const { dosTime, dosDate } = getDosDateTime(new Date());
+
+        const localParts = [];
+        const centralParts = [];
+        let offset = 0;
+        let centralDirSize = 0;
+
+        for (let i = 0; i < entries.length; i++) {
+          const nameBytes = encoder.encode(entries[i].filename);
+          const dataBytes = encoder.encode(entries[i].content);
+          const crc = computeCrc32(dataBytes);
+          const size = dataBytes.length;
+
+          // 1. Local File Header (30 bytes + filename)
+          const localHeader = new Uint8Array(30 + nameBytes.length);
+          const lv = new DataView(localHeader.buffer);
+          lv.setUint32(0, 0x04034b50, true);      // Local file header signature
+          lv.setUint16(4, 20, true);              // Version needed to extract (2.0)
+          lv.setUint16(6, 0x0800, true);          // General purpose bit flag (UTF-8)
+          lv.setUint16(8, 0, true);               // Compression method (0 = STORE)
+          lv.setUint16(10, dosTime, true);        // Last mod file time
+          lv.setUint16(12, dosDate, true);        // Last mod file date
+          lv.setUint32(14, crc, true);            // CRC-32
+          lv.setUint32(18, size, true);           // Compressed size
+          lv.setUint32(22, size, true);           // Uncompressed size
+          lv.setUint16(26, nameBytes.length, true); // File name length
+          lv.setUint16(28, 0, true);              // Extra field length
+          localHeader.set(nameBytes, 30);
+
+          localParts.push(localHeader, dataBytes);
+
+          // 2. Central Directory File Header (46 bytes + filename)
+          const centralHeader = new Uint8Array(46 + nameBytes.length);
+          const cv = new DataView(centralHeader.buffer);
+          cv.setUint32(0, 0x02014b50, true);      // Central file header signature
+          cv.setUint16(4, 20, true);              // Version made by
+          cv.setUint16(6, 20, true);              // Version needed to extract
+          cv.setUint16(8, 0x0800, true);          // General purpose bit flag (UTF-8)
+          cv.setUint16(10, 0, true);              // Compression method (0 = STORE)
+          cv.setUint16(12, dosTime, true);        // Last mod file time
+          cv.setUint16(14, dosDate, true);        // Last mod file date
+          cv.setUint32(16, crc, true);            // CRC-32
+          cv.setUint32(20, size, true);           // Compressed size
+          cv.setUint32(24, size, true);           // Uncompressed size
+          cv.setUint16(28, nameBytes.length, true); // File name length
+          cv.setUint16(30, 0, true);              // Extra field length
+          cv.setUint16(32, 0, true);              // File comment length
+          cv.setUint16(34, 0, true);              // Disk number start
+          cv.setUint16(36, 0, true);              // Internal file attributes
+          cv.setUint32(38, 0, true);              // External file attributes
+          cv.setUint32(42, offset, true);         // Relative offset of local header
+          centralHeader.set(nameBytes, 46);
+
+          centralParts.push(centralHeader);
+
+          offset += localHeader.length + dataBytes.length;
+          centralDirSize += centralHeader.length;
+        }
+
+        // 3. End of Central Directory Record (22 bytes)
+        const eocd = new Uint8Array(22);
+        const ev = new DataView(eocd.buffer);
+        ev.setUint32(0, 0x06054b50, true);        // End of central dir signature
+        ev.setUint16(4, 0, true);                 // Number of this disk
+        ev.setUint16(6, 0, true);                 // Disk where central directory starts
+        ev.setUint16(8, entries.length & 0xFFFF, true);  // Records on this disk
+        ev.setUint16(10, entries.length & 0xFFFF, true); // Total records
+        ev.setUint32(12, centralDirSize, true);   // Size of central directory
+        ev.setUint32(16, offset, true);           // Offset of start of central directory
+        ev.setUint16(20, 0, true);                // Comment length
+
+        return new Blob([...localParts, ...centralParts, eocd], { type: 'application/zip' });
+      }
+
+      /* ========================================================================
+         Formatting, CSV Serialization & Clipboard Helpers
          ======================================================================== */
       function formatNumber(num) {
         return Number(num).toLocaleString();
@@ -1607,16 +2328,60 @@
         return val || 'email name';
       }
 
-      function getSanitizedFilename() {
-        let name = els.fileNameInput.value.trim();
+      function getSanitizedBaseName() {
+        let name = els.baseNameInput.value.trim();
+        // Strip trailing .csv if user typed it
+        name = name.replace(/\.csv$/i, '');
+        // Remove invalid filename characters
         name = name.replace(/[<>:"/\\|?*\x00-\x1F]/g, '').trim();
-        if (!name) {
-          name = 'combined_emails.csv';
+        return name || 'combined_emails';
+      }
+
+      function buildSingleColumnCsvString(emailsSlice) {
+        const header = escapeCsvField(getOutputHeaderName());
+        const lines = new Array(emailsSlice.length + 1);
+        lines[0] = header;
+        for (let i = 0; i < emailsSlice.length; i++) {
+          lines[i + 1] = escapeCsvField(emailsSlice[i]);
         }
-        if (!/\.csv$/i.test(name)) {
-          name += '.csv';
+        return lines.join('\r\n') + '\r\n';
+      }
+
+      function triggerBlobDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1200);
+      }
+
+      /**
+       * Copies plain text via offscreen textarea + document.execCommand('copy')
+       * so clipboard works reliably offline and inside sandboxed iframes.
+       */
+      function copyTextToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+
+        let copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } finally {
+          document.body.removeChild(textarea);
         }
-        return name;
+        return copied;
       }
 
       function readFileAsText(file) {
@@ -1629,7 +2394,7 @@
       }
 
       /* ========================================================================
-         Toast Notification System (Non-Blocking Alternative to alert())
+         Toast Notifications (Non-Blocking Alternative to alert())
          ======================================================================== */
       function showToast(message, type = 'info') {
         const toast = document.createElement('div');
@@ -1648,7 +2413,7 @@
       }
 
       /* ========================================================================
-         Core Combine & Filter Pipeline
+         Core Combine, Filter & Split Computation Pipeline
          ======================================================================== */
       function recomputeCombinedData() {
         const dedupe = els.optDedupe.checked;
@@ -1656,7 +2421,7 @@
         const sortAlpha = els.optSort.checked;
         const validOnly = els.optValidOnly.checked;
 
-        let totalExtracted = 0;
+        let totalRawRows = 0;
         let emptyRemoved = 0;
         let invalidRemoved = 0;
         let duplicatesRemoved = 0;
@@ -1666,7 +2431,7 @@
 
         for (let f = 0; f < state.files.length; f++) {
           const rows = state.files[f].rows;
-          totalExtracted += rows.length;
+          totalRawRows += rows.length;
 
           for (let r = 0; r < rows.length; r++) {
             let value = rows[r];
@@ -1705,14 +2470,122 @@
 
         state.combinedEmails = combined;
         state.stats = {
-          totalExtracted,
+          totalRawRows,
           emptyRemoved,
           invalidRemoved,
           duplicatesRemoved,
           totalRemoved: emptyRemoved + invalidRemoved + duplicatesRemoved
         };
 
+        recomputeSplitChunks();
         renderAll();
+      }
+
+      /**
+       * Computes lightweight split chunk descriptors (index ranges + filenames)
+       * without duplicating email string arrays in memory.
+       */
+      function recomputeSplitChunks() {
+        const total = state.combinedEmails.length;
+        const baseName = getSanitizedBaseName();
+        state.splitCappedFromRequested = false;
+
+        if (total === 0 || !state.splitInputValid) {
+          state.splitChunks = [];
+          return;
+        }
+
+        const chunks = [];
+
+        if (state.splitMode === 'perFile') {
+          const chunkSize = Math.max(1, Math.floor(state.splitValues.perFile));
+          let part = 1;
+          for (let start = 0; start < total; start += chunkSize) {
+            const end = Math.min(start + chunkSize, total);
+            chunks.push({
+              partNumber: part,
+              startIndex: start,
+              endIndex: end,
+              count: end - start,
+              filename: baseName + '_part' + part + '.csv'
+            });
+            part++;
+          }
+        } else {
+          const requestedFiles = Math.max(1, Math.floor(state.splitValues.numFiles));
+          let fileCount = requestedFiles;
+          if (fileCount > total) {
+            fileCount = total;
+            state.splitCappedFromRequested = true;
+          }
+
+          const baseSize = Math.floor(total / fileCount);
+          const remainder = total % fileCount;
+          let cursor = 0;
+
+          for (let p = 0; p < fileCount; p++) {
+            const size = baseSize + (p < remainder ? 1 : 0);
+            const partNumber = p + 1;
+            chunks.push({
+              partNumber,
+              startIndex: cursor,
+              endIndex: cursor + size,
+              count: size,
+              filename: baseName + '_part' + partNumber + '.csv'
+            });
+            cursor += size;
+          }
+        }
+
+        state.splitChunks = chunks;
+      }
+
+      /**
+       * Produces a clear human-readable breakdown string such as:
+       * "500 emails → 2 files (250 emails per file)"
+       * or "520 emails → 3 files (2 × 250, 1 × 20)"
+       */
+      function buildSplitSummaryString() {
+        const total = state.combinedEmails.length;
+        const chunks = state.splitChunks;
+
+        if (total === 0) {
+          return 'Upload CSV files to split your combined email list.';
+        }
+        if (!state.splitInputValid || chunks.length === 0) {
+          return 'Enter a valid split number (1 or greater) to calculate split files.';
+        }
+
+        const totalLabel = formatNumber(total) + (total === 1 ? ' email' : ' emails');
+        const filesLabel = formatNumber(chunks.length) + (chunks.length === 1 ? ' file' : ' files');
+
+        if (chunks.length === 1) {
+          return totalLabel + ' → 1 file (' + formatNumber(chunks[0].count) + (chunks[0].count === 1 ? ' email)' : ' emails)');
+        }
+
+        // Group chunk sizes while preserving order of appearance
+        const sizeCounts = [];
+        const sizeMap = new Map();
+        for (let i = 0; i < chunks.length; i++) {
+          const sz = chunks[i].count;
+          if (sizeMap.has(sz)) {
+            sizeCounts[sizeMap.get(sz)].freq++;
+          } else {
+            sizeMap.set(sz, sizeCounts.length);
+            sizeCounts.push({ size: sz, freq: 1 });
+          }
+        }
+
+        if (sizeCounts.length === 1) {
+          const perFile = sizeCounts[0].size;
+          return totalLabel + ' → ' + filesLabel + ' (' + formatNumber(perFile) + (perFile === 1 ? ' email per file)' : ' emails per file)');
+        }
+
+        const breakdown = sizeCounts
+          .map((item) => formatNumber(item.freq) + ' × ' + formatNumber(item.size))
+          .join(', ');
+
+        return totalLabel + ' → ' + filesLabel + ' (' + breakdown + ')';
       }
 
       /* ========================================================================
@@ -1721,13 +2594,20 @@
       function renderAll() {
         renderStats();
         renderFileList();
+        renderFilenameHints();
         renderExportBar();
         renderPreview();
+        renderSplitSection();
+      }
+
+      function renderFilenameHints() {
+        const base = getSanitizedBaseName();
+        els.baseNamePreviewHint.textContent = 'Split files: ' + base + '_part1.csv';
       }
 
       function renderStats() {
         const fileCount = state.files.length;
-        const { totalExtracted, emptyRemoved, invalidRemoved, duplicatesRemoved, totalRemoved } = state.stats;
+        const { totalRawRows, emptyRemoved, invalidRemoved, duplicatesRemoved, totalRemoved } = state.stats;
         const finalCount = state.combinedEmails.length;
 
         els.statFiles.textContent = formatNumber(fileCount);
@@ -1735,11 +2615,18 @@
           ? 'Add CSV files below'
           : fileCount === 1 ? '1 CSV file loaded' : formatNumber(fileCount) + ' CSV files loaded';
 
-        els.statExtracted.textContent = formatNumber(totalExtracted);
-        els.statRemoved.textContent = formatNumber(totalRemoved);
+        els.statRawRows.textContent = formatNumber(totalRawRows);
 
+        els.statFinal.textContent = formatNumber(finalCount);
+        els.statFinalSub.textContent = finalCount > 0
+          ? 'Header: "' + getOutputHeaderName() + '"'
+          : 'Ready for export or split';
+
+        els.statRemoved.textContent = formatNumber(totalRemoved);
         if (totalRemoved === 0) {
-          els.statRemovedSub.textContent = fileCount === 0 ? 'No rows filtered yet' : 'All extracted rows kept';
+          els.statRemovedSub.textContent = fileCount === 0
+            ? 'Duplicates / empty / invalid'
+            : 'All extracted rows kept';
         } else {
           const parts = [];
           if (duplicatesRemoved > 0) parts.push(formatNumber(duplicatesRemoved) + ' dup');
@@ -1747,11 +2634,6 @@
           if (invalidRemoved > 0) parts.push(formatNumber(invalidRemoved) + ' invalid');
           els.statRemovedSub.textContent = parts.join(' · ');
         }
-
-        els.statFinal.textContent = formatNumber(finalCount);
-        els.statFinalSub.textContent = finalCount > 0
-          ? 'Header: "' + getOutputHeaderName() + '"'
-          : 'Ready for CSV export';
       }
 
       function renderFileList() {
@@ -1789,23 +2671,23 @@
           const sizeSpan = document.createElement('span');
           sizeSpan.textContent = formatBytes(fileObj.size);
 
-          const sep = document.createElement('span');
-          sep.textContent = '•';
+          const sep1 = document.createElement('span');
+          sep1.textContent = '•';
 
           const rowsSpan = document.createElement('span');
           rowsSpan.className = 'file-row-count';
-          rowsSpan.textContent = formatNumber(fileObj.rows.length) + (fileObj.rows.length === 1 ? ' email row' : ' email rows');
+          rowsSpan.textContent = formatNumber(fileObj.rows.length) + (fileObj.rows.length === 1 ? ' row' : ' rows');
 
           detailsEl.appendChild(sizeSpan);
-          detailsEl.appendChild(sep);
+          detailsEl.appendChild(sep1);
           detailsEl.appendChild(rowsSpan);
 
           if (fileObj.detectedHeader) {
             const sep2 = document.createElement('span');
             sep2.textContent = '•';
             const hdrSpan = document.createElement('span');
-            hdrSpan.textContent = 'skipped header "' + fileObj.detectedHeader + '"';
-            hdrSpan.title = 'First row skipped: ' + fileObj.detectedHeader;
+            hdrSpan.textContent = 'skipped "' + fileObj.detectedHeader + '"';
+            hdrSpan.title = 'Header row skipped: ' + fileObj.detectedHeader;
             detailsEl.appendChild(sep2);
             detailsEl.appendChild(hdrSpan);
           }
@@ -1822,7 +2704,7 @@
           removeBtn.title = 'Remove file';
           removeBtn.dataset.fileId = fileObj.id;
           removeBtn.innerHTML =
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
             '<line x1="18" y1="6" x2="6" y2="18"></line>' +
             '<line x1="6" y1="6" x2="18" y2="18"></line>' +
             '</svg>';
@@ -1838,19 +2720,20 @@
       function renderExportBar() {
         const count = state.combinedEmails.length;
         const hasData = count > 0;
+        const combinedFilename = getSanitizedBaseName() + '.csv';
 
-        els.downloadBtn.disabled = !hasData;
-        els.copyBtn.disabled = !hasData;
+        els.downloadCombinedBtn.disabled = !hasData;
+        els.copyAllBtn.disabled = !hasData;
 
         if (hasData) {
-          els.exportHeadline.textContent = formatNumber(count) + (count === 1 ? ' email ready to export' : ' emails ready to export');
-          els.exportSubtext.textContent = 'Will save as ' + getSanitizedFilename() + ' with 1 column ("' + getOutputHeaderName() + '").';
+          els.exportHeadline.textContent = formatNumber(count) + (count === 1 ? ' clean email ready' : ' clean emails ready');
+          els.exportSubtext.textContent = 'Full file: ' + combinedFilename + ' · Column: "' + getOutputHeaderName() + '"';
         } else if (state.files.length > 0) {
-          els.exportHeadline.textContent = 'No emails match your current filters';
+          els.exportHeadline.textContent = 'No emails match active filters';
           els.exportSubtext.textContent = 'Adjust the filter checkboxes or upload another CSV file.';
         } else {
           els.exportHeadline.textContent = 'Ready to combine your CSVs';
-          els.exportSubtext.textContent = 'Upload one or more CSV files to generate your combined list.';
+          els.exportSubtext.textContent = 'Upload CSV files or load sample data to begin.';
         }
       }
 
@@ -1863,29 +2746,26 @@
         els.previewCountPill.textContent = formatNumber(totalFinal) + (totalFinal === 1 ? ' row' : ' rows');
         els.searchClearBtn.classList.toggle('visible', state.searchQuery.length > 0);
 
-        // No files loaded at all
         if (state.files.length === 0) {
           els.previewMetaBar.style.display = 'none';
           els.previewTable.style.display = 'none';
           els.moreIndicator.style.display = 'none';
           els.emptyState.style.display = 'flex';
           els.emptyState.querySelector('h3').textContent = 'No CSV files loaded yet';
-          els.emptyState.querySelector('p').textContent = 'Drop multiple CSV files on the left or click "Load sample CSVs" to preview your single-column merged email list.';
+          els.emptyState.querySelector('p').textContent = 'Drop multiple CSV files on the left or click "Load Sample CSVs" to preview your single-column combined email list.';
           return;
         }
 
-        // Files loaded, but 0 final emails after filtering
         if (totalFinal === 0) {
           els.previewMetaBar.style.display = 'none';
           els.previewTable.style.display = 'none';
           els.moreIndicator.style.display = 'none';
           els.emptyState.style.display = 'flex';
           els.emptyState.querySelector('h3').textContent = 'No emails to display';
-          els.emptyState.querySelector('p').textContent = 'Your uploaded files had no remaining rows after skipping headers and applying the active filters.';
+          els.emptyState.querySelector('p').textContent = 'All rows were skipped or filtered out by the active options.';
           return;
         }
 
-        // Apply quick search filter
         const filtered = query
           ? state.combinedEmails.filter((email) => email.toLowerCase().includes(query))
           : state.combinedEmails;
@@ -1898,11 +2778,10 @@
           els.moreIndicator.style.display = 'none';
           els.emptyState.style.display = 'flex';
           els.emptyState.querySelector('h3').textContent = 'No matching emails found';
-          els.emptyState.querySelector('p').textContent = 'Try a different search term or clear the filter box above.';
+          els.emptyState.querySelector('p').textContent = 'Try another search query or clear the search input.';
           return;
         }
 
-        // Render up to first 100 entries
         const displayCount = Math.min(filtered.length, MAX_PREVIEW_ROWS);
         els.emptyState.style.display = 'none';
         els.previewTable.style.display = 'table';
@@ -1945,14 +2824,193 @@
           els.moreIndicator.style.display = 'block';
           els.moreIndicator.textContent =
             '+ ' + formatNumber(remaining) + ' more ' + (remaining === 1 ? 'email' : 'emails') +
-            ' not shown in preview (all ' + formatNumber(totalFinal) + ' emails will be included in the downloaded CSV).';
+            ' not shown in preview (all ' + formatNumber(totalFinal) + ' emails are included in downloads & splits).';
         } else {
           els.moreIndicator.style.display = 'none';
         }
       }
 
+      function renderSplitPresets() {
+        const mode = state.splitMode;
+        const currentVal = state.splitValues[mode];
+        const list = PRESETS[mode];
+
+        els.presetChips.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 0; i < list.length; i++) {
+          const val = list[i];
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'preset-chip' + (state.splitInputValid && currentVal === val ? ' active' : '');
+          btn.dataset.presetValue = String(val);
+          btn.textContent = mode === 'perFile'
+            ? formatNumber(val) + ' / file'
+            : formatNumber(val) + ' files';
+          btn.setAttribute('aria-pressed', state.splitInputValid && currentVal === val ? 'true' : 'false');
+          fragment.appendChild(btn);
+        }
+
+        els.presetChips.appendChild(fragment);
+      }
+
+      function renderSplitSection() {
+        const mode = state.splitMode;
+        const isPerFile = mode === 'perFile';
+        const total = state.combinedEmails.length;
+        const chunks = state.splitChunks;
+        const headerName = getOutputHeaderName();
+
+        // Update segmented control active state
+        els.modePerFileBtn.classList.toggle('active', isPerFile);
+        els.modePerFileBtn.setAttribute('aria-selected', isPerFile ? 'true' : 'false');
+        els.modeNumFilesBtn.classList.toggle('active', !isPerFile);
+        els.modeNumFilesBtn.setAttribute('aria-selected', !isPerFile ? 'true' : 'false');
+
+        // Update input label & error message visibility
+        els.splitValueLabel.textContent = isPerFile ? 'Emails per file' : 'Number of files';
+        els.splitErrorHint.classList.toggle('visible', !state.splitInputValid);
+
+        // Render preset chips for active mode
+        renderSplitPresets();
+
+        // Update summary banner & header badges
+        els.splitHeaderBadge.textContent = 'Header: ' + headerName;
+        els.splitPartsPill.textContent = formatNumber(chunks.length) + (chunks.length === 1 ? ' file' : ' files');
+        els.splitSummaryText.textContent = buildSplitSummaryString();
+
+        if (total === 0) {
+          els.splitSummarySub.textContent = 'All split CSV files can be downloaded together inside a single .ZIP archive or individually below.';
+        } else if (!state.splitInputValid) {
+          els.splitSummarySub.textContent = 'Adjust the split number on the left to generate split files.';
+        } else if (state.splitCappedFromRequested) {
+          els.splitSummarySub.textContent =
+            'Requested ' + formatNumber(state.splitValues.numFiles) + ' files, capped to ' +
+            formatNumber(chunks.length) + ' non-empty files (1 email each). Archive: ' + getSanitizedBaseName() + '_split.zip';
+        } else {
+          els.splitSummarySub.textContent =
+            'Each CSV starts with "' + headerName + '" · Archive: ' + getSanitizedBaseName() + '_split.zip';
+        }
+
+        // Enable / disable ZIP download button
+        const canDownloadSplit = total > 0 && state.splitInputValid && chunks.length > 0;
+        els.downloadZipBtn.disabled = !canDownloadSplit;
+        els.downloadZipLabel.textContent = canDownloadSplit
+          ? 'Download All ' + formatNumber(chunks.length) + (chunks.length === 1 ? ' File (.ZIP)' : ' Split Files (.ZIP)')
+          : 'Download All Split Files (.ZIP)';
+
+        // Render split chunks grid or empty state
+        if (!canDownloadSplit) {
+          els.splitChunksHeader.style.display = 'none';
+          els.splitGuardNotice.classList.remove('visible');
+          els.splitChunksGrid.style.display = 'none';
+          els.splitChunksGrid.innerHTML = '';
+          els.splitEmptyState.style.display = 'flex';
+          return;
+        }
+
+        els.splitEmptyState.style.display = 'none';
+        els.splitChunksHeader.style.display = 'flex';
+        els.splitChunksGrid.style.display = 'grid';
+
+        const displayCount = Math.min(chunks.length, MAX_SPLIT_PREVIEW_PARTS);
+        els.splitChunksTitle.textContent = chunks.length > MAX_SPLIT_PREVIEW_PARTS
+          ? 'Generated Split Files (First ' + MAX_SPLIT_PREVIEW_PARTS + ' of ' + formatNumber(chunks.length) + ')'
+          : 'Generated Split Files (' + formatNumber(chunks.length) + ')';
+
+        // Safety / Performance guard for >100 split parts
+        if (chunks.length > MAX_SPLIT_PREVIEW_PARTS) {
+          els.splitGuardNotice.classList.add('visible');
+          els.splitGuardText.textContent =
+            'Displaying the first ' + MAX_SPLIT_PREVIEW_PARTS + ' of ' + formatNumber(chunks.length) +
+            ' split files to keep the browser fast. All ' + formatNumber(chunks.length) +
+            ' CSV files will be included when you click "Download All Split Files (.ZIP)".';
+        } else {
+          els.splitGuardNotice.classList.remove('visible');
+        }
+
+        els.splitChunksGrid.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 0; i < displayCount; i++) {
+          const chunk = chunks[i];
+          const card = document.createElement('div');
+          card.className = 'chunk-card';
+
+          const info = document.createElement('div');
+          info.className = 'chunk-info';
+
+          const topRow = document.createElement('div');
+          topRow.className = 'chunk-top-row';
+
+          const fname = document.createElement('span');
+          fname.className = 'chunk-filename';
+          fname.textContent = chunk.filename;
+          fname.title = chunk.filename;
+
+          topRow.appendChild(fname);
+
+          const meta = document.createElement('div');
+          meta.className = 'chunk-meta';
+
+          const rangeSpan = document.createElement('span');
+          const rowStart = chunk.startIndex + 1;
+          const rowEnd = chunk.endIndex;
+          rangeSpan.textContent = rowStart === rowEnd
+            ? 'Row ' + formatNumber(rowStart)
+            : 'Rows ' + formatNumber(rowStart) + '–' + formatNumber(rowEnd);
+
+          const countBadge = document.createElement('span');
+          countBadge.className = 'chunk-count-badge';
+          countBadge.textContent = formatNumber(chunk.count) + (chunk.count === 1 ? ' email' : ' emails');
+
+          meta.appendChild(rangeSpan);
+          meta.appendChild(countBadge);
+
+          info.appendChild(topRow);
+          info.appendChild(meta);
+
+          const actions = document.createElement('div');
+          actions.className = 'chunk-actions';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'btn btn-secondary btn-sm';
+          copyBtn.dataset.chunkAction = 'copy';
+          copyBtn.dataset.chunkIndex = String(i);
+          copyBtn.innerHTML =
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>' +
+            '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>' +
+            '</svg>' +
+            '<span>Copy</span>';
+
+          const dlBtn = document.createElement('button');
+          dlBtn.type = 'button';
+          dlBtn.className = 'btn btn-soft btn-sm';
+          dlBtn.dataset.chunkAction = 'download';
+          dlBtn.dataset.chunkIndex = String(i);
+          dlBtn.innerHTML =
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
+            '<polyline points="7 10 12 15 17 10"></polyline>' +
+            '<line x1="12" y1="15" x2="12" y2="3"></line>' +
+            '</svg>' +
+            '<span>Download CSV</span>';
+
+          actions.appendChild(copyBtn);
+          actions.appendChild(dlBtn);
+
+          card.appendChild(info);
+          card.appendChild(actions);
+          fragment.appendChild(card);
+        }
+
+        els.splitChunksGrid.appendChild(fragment);
+      }
+
       /* ========================================================================
-         File Ingestion & Sample Data Loading
+         File Ingestion & Realistic Sample Data (~32 Raw Rows Across 3 Files)
          ======================================================================== */
       async function handleIncomingFiles(fileList) {
         if (!fileList || fileList.length === 0) return;
@@ -1988,7 +3046,7 @@
             addedCount++;
           } catch (err) {
             console.error(err);
-            showToast('Failed to parse "' + file.name + '".', 'error');
+            showToast('Failed to read "' + file.name + '".', 'error');
           }
         }
 
@@ -2002,7 +3060,7 @@
 
         if (skippedCount > 0) {
           showToast(
-            'Skipped ' + skippedCount + ' unsupported non-CSV ' + (skippedCount === 1 ? 'file.' : 'files.'),
+            'Skipped ' + skippedCount + ' non-CSV ' + (skippedCount === 1 ? 'file.' : 'files.'),
             'error'
           );
         }
@@ -2017,26 +3075,45 @@
               'alice.johnson@example.com,Alice,Homepage\r\n' +
               'bob.smith@company.org,Bob,"Blog, Footer"\r\n' +
               '  carol.davis@domain.net  ,Carol,Newsletter\r\n' +
+              'daniel.park@northwind.io,Daniel,Sidebar\r\n' +
+              'elena.rodriguez@brightmail.co,Elena,Popup\r\n' +
               '\r\n' +
-              'not-a-valid-email,Unknown,Import\r\n'
+              'farah.khan@studio-alpha.com,Farah,Homepage\r\n' +
+              'george.miller@greenleaf.org,George,Footer\r\n' +
+              'hannah.chen@pixelcraft.dev,Hannah,Referral\r\n' +
+              'not-a-valid-email,Unknown,Legacy Import\r\n' +
+              'ian.brooks@cloudsync.net,Ian,Newsletter\r\n'
           },
           {
             name: 'webinar_registrations.csv',
             content:
               '"email name",company,notes\n' +
               'ALICE.JOHNSON@example.com,"Acme, Inc.","Attended live\nAsked question"\n' +
-              'david.lee@startup.io,StartupIO,VIP\n' +
-              'eva.martinez@agency.co,Creative Co,Referral\n' +
-              'frank.wu@tech.dev,TechDev,\n'
+              'julia.patel@vertexlabs.io,Vertex Labs,VIP\n' +
+              'kevin.obrien@harborview.co,Harborview,Replay\n' +
+              'laura.bennett@summitdata.com,Summit Data,"Interested in ""Pro"" plan"\n' +
+              'marcus.wright@fintechhub.org,FinTech Hub,Live\n' +
+              '   \n' +
+              'nadia.hassan@creativeflow.design,CreativeFlow,Referral\n' +
+              'oliver.grant@bluewave.tech,BlueWave,Partner\n' +
+              'priya.sharma@scaleops.in,ScaleOps,Live\n' +
+              'quinn.foster@nextgen.ai,NextGen AI,VIP\n' +
+              'rachel.kim@aurorahealth.org,Aurora Health,Replay\n'
           },
           {
             name: 'conference_leads.csv',
             content:
-              'email name\n' +
-              'grace.kim@studio.design\n' +
-              'bob.smith@company.org\n' +
-              'henry.patel@enterprise.com\n' +
-              'iris.chen@cloudops.net\n\n'
+              'email name,booth_tag\n' +
+              'samir.verma@orbitcloud.com,Day1\n' +
+              'bob.smith@company.org,Day1\n' +
+              '  tessa.morgan@lumenworks.co  ,Day1\n' +
+              'uma.nair@dataforge.io,Day2\n' +
+              'victor.santos@meridian.dev,Day2\n' +
+              'wendy.zhao@cobaltlabs.net,Day2\n' +
+              'xavier.cole@swiftship.com,Day2\n' +
+              'yasmine.ali@verveagency.co,Day3\n' +
+              'zachary.reed@pinecrest.org,Day3\n' +
+              'kevin.obrien@harborview.co,Day3\n'
           }
         ];
 
@@ -2052,100 +3129,139 @@
           });
         }
 
+        // If user hasn't changed default 250 yet and sample has ~25 emails, set a helpful 10/file preview only if still empty beforehand
+        if (state.files.length === samples.length && state.splitMode === 'perFile' && state.splitValues.perFile === 250) {
+          state.splitValues.perFile = 10;
+          els.splitValueInput.value = '10';
+          state.splitInputValid = true;
+        }
+
         recomputeCombinedData();
-        showToast('Loaded 3 sample CSV files.', 'success');
+        showToast('Loaded 3 sample CSV files (~31 raw rows). Try splitting or exporting!', 'success');
       }
 
       /* ========================================================================
-         Export Actions: Download Combined CSV & Copy to Clipboard
+         Export Actions: Combined CSV, Copy All, Individual Split CSV/Copy & ZIP
          ======================================================================== */
       function downloadCombinedCsv() {
         if (state.combinedEmails.length === 0) {
           showToast('No emails available to download.', 'error');
           return;
         }
-
         try {
-          const header = escapeCsvField(getOutputHeaderName());
-          const lines = new Array(state.combinedEmails.length + 1);
-          lines[0] = header;
-
-          for (let i = 0; i < state.combinedEmails.length; i++) {
-            lines[i + 1] = escapeCsvField(state.combinedEmails[i]);
-          }
-
-          const csvContent = lines.join('\r\n') + '\r\n';
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-
-          const filename = getSanitizedFilename();
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          const csv = buildSingleColumnCsvString(state.combinedEmails);
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const filename = getSanitizedBaseName() + '.csv';
+          triggerBlobDownload(blob, filename);
           showToast('Downloaded ' + filename + ' (' + formatNumber(state.combinedEmails.length) + ' emails).', 'success');
         } catch (err) {
           console.error(err);
-          showToast('Could not generate CSV file for download.', 'error');
+          showToast('Could not generate combined CSV.', 'error');
         }
       }
 
-      let copyResetTimer = null;
+      let copyAllResetTimer = null;
 
-      function copyEmailsToClipboard() {
+      function copyAllEmails() {
         if (state.combinedEmails.length === 0) {
           showToast('No emails available to copy.', 'error');
           return;
         }
-
-        const textToCopy = state.combinedEmails.join('\n');
-
         try {
-          // Use offscreen textarea + document.execCommand('copy') for reliable iframe & offline support
-          const textarea = document.createElement('textarea');
-          textarea.value = textToCopy;
-          textarea.setAttribute('readonly', '');
-          textarea.style.position = 'fixed';
-          textarea.style.top = '-9999px';
-          textarea.style.left = '-9999px';
-          document.body.appendChild(textarea);
+          const ok = copyTextToClipboard(state.combinedEmails.join('\n'));
+          if (!ok) throw new Error('Copy failed');
 
-          textarea.focus();
-          textarea.select();
-          textarea.setSelectionRange(0, textarea.value.length);
+          els.copyAllBtn.classList.add('btn-success-state');
+          els.copyAllLabel.textContent = 'Copied!';
 
-          const copied = document.execCommand('copy');
-          document.body.removeChild(textarea);
-
-          if (!copied) {
-            throw new Error('Copy command returned false');
-          }
-
-          // Instant visual confirmation on button
-          els.copyBtn.classList.add('btn-success-state');
-          els.copyBtnLabel.textContent = 'Copied!';
-
-          if (copyResetTimer) clearTimeout(copyResetTimer);
-          copyResetTimer = setTimeout(() => {
-            els.copyBtn.classList.remove('btn-success-state');
-            els.copyBtnLabel.textContent = 'Copy Emails';
+          if (copyAllResetTimer) clearTimeout(copyAllResetTimer);
+          copyAllResetTimer = setTimeout(() => {
+            els.copyAllBtn.classList.remove('btn-success-state');
+            els.copyAllLabel.textContent = 'Copy All Emails';
           }, 2000);
 
-          showToast('Copied ' + formatNumber(state.combinedEmails.length) + ' emails to clipboard.', 'success');
+          showToast('Copied all ' + formatNumber(state.combinedEmails.length) + ' emails to clipboard.', 'success');
         } catch (err) {
           console.error(err);
-          showToast('Unable to copy automatically. Try downloading the CSV instead.', 'error');
+          showToast('Could not copy to clipboard. Use Download CSV instead.', 'error');
+        }
+      }
+
+      function downloadSingleSplitChunk(chunkIndex) {
+        const chunk = state.splitChunks[chunkIndex];
+        if (!chunk) return;
+        try {
+          const slice = state.combinedEmails.slice(chunk.startIndex, chunk.endIndex);
+          const csv = buildSingleColumnCsvString(slice);
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          triggerBlobDownload(blob, chunk.filename);
+          showToast('Downloaded ' + chunk.filename + ' (' + formatNumber(chunk.count) + ' emails).', 'success');
+        } catch (err) {
+          console.error(err);
+          showToast('Failed to download ' + chunk.filename + '.', 'error');
+        }
+      }
+
+      function copySingleSplitChunk(chunkIndex, buttonEl) {
+        const chunk = state.splitChunks[chunkIndex];
+        if (!chunk) return;
+        try {
+          const slice = state.combinedEmails.slice(chunk.startIndex, chunk.endIndex);
+          const ok = copyTextToClipboard(slice.join('\n'));
+          if (!ok) throw new Error('Copy failed');
+
+          const labelSpan = buttonEl.querySelector('span');
+          buttonEl.classList.add('btn-success-state');
+          if (labelSpan) labelSpan.textContent = 'Copied!';
+
+          if (buttonEl._resetTimer) clearTimeout(buttonEl._resetTimer);
+          buttonEl._resetTimer = setTimeout(() => {
+            buttonEl.classList.remove('btn-success-state');
+            if (labelSpan) labelSpan.textContent = 'Copy';
+          }, 1800);
+
+          showToast('Copied ' + formatNumber(chunk.count) + ' emails from ' + chunk.filename + '.', 'success');
+        } catch (err) {
+          console.error(err);
+          showToast('Could not copy chunk emails.', 'error');
+        }
+      }
+
+      function downloadAllSplitZip() {
+        if (state.combinedEmails.length === 0 || state.splitChunks.length === 0 || !state.splitInputValid) {
+          showToast('No split files available to archive.', 'error');
+          return;
+        }
+        try {
+          const entries = new Array(state.splitChunks.length);
+          for (let i = 0; i < state.splitChunks.length; i++) {
+            const chunk = state.splitChunks[i];
+            const slice = state.combinedEmails.slice(chunk.startIndex, chunk.endIndex);
+            entries[i] = {
+              filename: chunk.filename,
+              content: buildSingleColumnCsvString(slice)
+            };
+          }
+
+          const zipBlob = createStoreZipBlob(entries);
+          const zipFilename = getSanitizedBaseName() + '_split.zip';
+          triggerBlobDownload(zipBlob, zipFilename);
+
+          showToast(
+            'Downloaded ' + zipFilename + ' with ' + formatNumber(entries.length) +
+            (entries.length === 1 ? ' CSV file.' : ' CSV files.'),
+            'success'
+          );
+        } catch (err) {
+          console.error(err);
+          showToast('Failed to build ZIP archive.', 'error');
         }
       }
 
       /* ========================================================================
          Event Listeners
          ======================================================================== */
-      // File Picker Buttons
+      // File Picker & Dropzone Controls
       els.browseBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         els.fileInput.click();
@@ -2173,11 +3289,10 @@
 
       els.fileInput.addEventListener('change', (e) => {
         handleIncomingFiles(e.target.files);
-        // Reset input value so the same file can be re-selected if needed
         e.target.value = '';
       });
 
-      // Drag and Drop Handling
+      // Drag and Drop Events
       let dragDepth = 0;
 
       els.dropZone.addEventListener('dragenter', (e) => {
@@ -2212,7 +3327,7 @@
         }
       });
 
-      // Individual File Removal (Event Delegation)
+      // Individual File Removal
       els.fileList.addEventListener('click', (e) => {
         const removeBtn = e.target.closest('.btn-remove-file');
         if (!removeBtn) return;
@@ -2227,7 +3342,7 @@
         }
       });
 
-      // Clear All Files
+      // Clear All Uploaded Files
       els.clearAllBtn.addEventListener('click', () => {
         if (state.files.length === 0) return;
         state.files = [];
@@ -2237,22 +3352,27 @@
         showToast('Cleared all uploaded files.');
       });
 
-      // Options & Output Settings Live Updates
+      // Live Processing Toggles
       [els.optDedupe, els.optTrimEmpty, els.optSort, els.optValidOnly].forEach((checkbox) => {
         checkbox.addEventListener('change', recomputeCombinedData);
       });
 
+      // Editable Output Header & Base Filename
       els.headerNameInput.addEventListener('input', () => {
         renderStats();
         renderExportBar();
         renderPreview();
+        renderSplitSection();
       });
 
-      els.fileNameInput.addEventListener('input', () => {
+      els.baseNameInput.addEventListener('input', () => {
+        recomputeSplitChunks();
+        renderFilenameHints();
         renderExportBar();
+        renderSplitSection();
       });
 
-      // Preview Search Filter
+      // Preview Search Input
       els.searchInput.addEventListener('input', (e) => {
         state.searchQuery = e.target.value;
         renderPreview();
@@ -2265,11 +3385,80 @@
         renderPreview();
       });
 
-      // Export Buttons
-      els.downloadBtn.addEventListener('click', downloadCombinedCsv);
-      els.copyBtn.addEventListener('click', copyEmailsToClipboard);
+      // Full Combined Export Actions
+      els.downloadCombinedBtn.addEventListener('click', downloadCombinedCsv);
+      els.copyAllBtn.addEventListener('click', copyAllEmails);
 
-      // Initial render
+      // Split Mode Segmented Control
+      function setSplitMode(newMode) {
+        if (state.splitMode === newMode) return;
+        state.splitMode = newMode;
+        state.splitInputValid = true;
+        els.splitValueInput.value = String(state.splitValues[newMode]);
+        recomputeSplitChunks();
+        renderSplitSection();
+      }
+
+      els.modePerFileBtn.addEventListener('click', () => setSplitMode('perFile'));
+      els.modeNumFilesBtn.addEventListener('click', () => setSplitMode('numFiles'));
+
+      // Split Numeric Input
+      els.splitValueInput.addEventListener('input', () => {
+        const raw = els.splitValueInput.value.trim();
+        const parsed = Number(raw);
+        if (raw === '' || !Number.isFinite(parsed) || parsed < 1 || !Number.isInteger(parsed)) {
+          state.splitInputValid = false;
+        } else {
+          state.splitInputValid = true;
+          state.splitValues[state.splitMode] = parsed;
+        }
+        recomputeSplitChunks();
+        renderSplitSection();
+      });
+
+      els.splitValueInput.addEventListener('blur', () => {
+        if (!state.splitInputValid) {
+          const fallback = Math.max(1, Math.floor(state.splitValues[state.splitMode]) || 1);
+          state.splitValues[state.splitMode] = fallback;
+          state.splitInputValid = true;
+          els.splitValueInput.value = String(fallback);
+          recomputeSplitChunks();
+          renderSplitSection();
+        }
+      });
+
+      // Split Quick Preset Chips (Event Delegation)
+      els.presetChips.addEventListener('click', (e) => {
+        const chip = e.target.closest('.preset-chip');
+        if (!chip) return;
+        const val = parseInt(chip.dataset.presetValue, 10);
+        if (!Number.isFinite(val) || val < 1) return;
+
+        state.splitValues[state.splitMode] = val;
+        state.splitInputValid = true;
+        els.splitValueInput.value = String(val);
+        recomputeSplitChunks();
+        renderSplitSection();
+      });
+
+      // Split ZIP Download Button
+      els.downloadZipBtn.addEventListener('click', downloadAllSplitZip);
+
+      // Individual Split Chunk Download & Copy (Event Delegation)
+      els.splitChunksGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-chunk-action]');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.chunkIndex, 10);
+        if (!Number.isFinite(idx)) return;
+
+        if (btn.dataset.chunkAction === 'download') {
+          downloadSingleSplitChunk(idx);
+        } else if (btn.dataset.chunkAction === 'copy') {
+          copySingleSplitChunk(idx, btn);
+        }
+      });
+
+      // Initial Render
       renderAll();
     })();
   </script>
